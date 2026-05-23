@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物業轉按慳息計算機</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #18bc9c;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #128f76;
+        }
+
+        .result-box {
+            background-color: #e8f8f5;
+            border-left: 5px solid var(--secondary-color);
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .verdict {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .good { background-color: #d4edda; color: #155724; }
+        .bad { background-color: #f8d7da; color: #721c24; }
+        
+        .note {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏠 物業轉按慳息計算機</h1>
+    
+    <div class="grid">
+        <!-- 現有按揭資料 -->
+        <div class="card">
+            <h2>1. 現有按揭（唔轉按）</h2>
+            <div class="form-group">
+                <label for="currLoan">剩餘按揭貸款額 ($)</label>
+                <input type="number" id="currLoan" value="4000000" placeholder="例如: 4000000">
+            </div>
+            <div class="form-group">
+                <label for="currRate">現時按揭年利率 (%)</label>
+                <input type="number" id="currRate" value="4.125" step="0.001" placeholder="例如: 4.125">
+            </div>
+            <div class="form-group">
+                <label for="currTenure">剩餘供款年期 (年)</label>
+                <input type="number" id="currTenure" value="25" placeholder="例如: 25">
+            </div>
+        </div>
+
+        <!-- 新按揭計畫資料 -->
+        <div class="card">
+            <h2>2. 新按揭計畫（轉按）</h2>
+            <div class="form-group">
+                <label for="newRate">新按揭年利率 (%)</label>
+                <input type="number" id="newRate" value="3.625" step="0.001" placeholder="例如: 3.625">
+            </div>
+            <div class="form-group">
+                <label for="cashBack">銀行現金回贈 (%)</label>
+                <input type="number" id="cashBack" value="1" step="0.1" placeholder="例如: 1">
+            </div>
+            <div class="form-group">
+                <label for="legalFee">轉按手續費/律師費 ($)</label>
+                <input type="number" id="legalFee" value="6000" placeholder="例如: 6000">
+            </div>
+            <div class="form-group">
+                <label for="penalty">舊銀行罰息/手續費 ($) *如適用</label>
+                <input type="number" id="penalty" value="0" placeholder="無就填 0">
+            </div>
+        </div>
+    </div>
+
+    <!-- 計算按鈕 -->
+    <button onclick="calculateRefinance()">立即計算利息開支</button>
+
+    <!-- 結果顯示 -->
+    <div class="card" id="resultCard" style="display:none;">
+        <h2>📊 計算結果（以兩年罰息期/觀察期作對比）</h2>
+        <p>好多時轉按最著數係兩年後再搵機會，所以呢度用 <strong>首2年（24個月）</strong> 的開支作客觀對比：</p>
+        
+        <div class="grid">
+            <div>
+                <p><strong>保持現狀（不轉按）：</strong></p>
+                <ul>
+                    <li>首2年利息開支: <span id="outCurrInterest">$0</span></li>
+                    <li>首2年總供款額: <span id="outCurrTotal">$0</span></li>
+                </ul>
+            </div>
+            <div>
+                <p><strong>選擇轉按：</strong></p>
+                <ul>
+                    <li>首2年利息開支: <span id="outNewInterest">$0</span></li>
+                    <li>新銀行現金回贈: <span id="outCashBack">+$0</span></li>
+                    <li>轉按總成本(律師+罰息): <span id="outCost">-$0</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="result-box">
+            <p><strong>轉按實質淨損益 (扣除所有成本及回贈)：</strong></p>
+            <div id="verdictBox" class="verdict"></div>
+        </div>
+        
+        <p class="note">* 註：本計算機採用常見的每月等額本息（P&I）公式計算。兩年後的剩餘本金亦會因利率下降而減得更快，轉按實際長遠效益通常比兩年計算更好。此結果僅供參考。</p>
+    </div>
+</div>
+
+<script>
+    function calculatePMT(principal, annualRate, years) {
+        let monthlyRate = (annualRate / 100) / 12;
+        let numberOfPayments = years * 12;
+        if (monthlyRate === 0) return principal / numberOfPayments;
+        return (principal * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+    }
+
+    function getAmortizationFirst2Years(principal, annualRate, years) {
+        let monthlyRate = (annualRate / 100) / 12;
+        let pmt = calculatePMT(principal, annualRate, years);
+        let totalInterest = 0;
+        let totalPayment = 0;
+        let currentBalance = principal;
+
+        // 計算24個月（2年）的利息
+        for (let i = 0; i < 24; i++) {
+            let interestPayment = currentBalance * monthlyRate;
+            let principalPayment = pmt - interestPayment;
+            
+            totalInterest += interestPayment;
+            totalPayment += pmt;
+            currentBalance -= principalPayment;
+            
+            if (currentBalance <= 0) break;
+        }
+        return { totalInterest, totalPayment };
+    }
+
+    function calculateRefinance() {
+        // 讀取輸入值
+        let currLoan = parseFloat(document.getElementById('currLoan').value) || 0;
+        let currRate = parseFloat(document.getElementById('currRate').value) || 0;
+        let currTenure = parseInt(document.getElementById('currTenure').value) || 0;
+
+        let newRate = parseFloat(document.getElementById('newRate').value) || 0;
+        let cashBackPct = parseFloat(document.getElementById('cashBack').value) || 0;
+        let legalFee = parseFloat(document.getElementById('legalFee').value) || 0;
+        let penalty = parseFloat(document.getElementById('penalty').value) || 0;
+
+        if (currLoan <= 0 || currTenure <= 0) {
+            alert('請輸入正確的貸款額及年期');
+            return;
+        }
+
+        // 計算現有計劃首2年
+        let currData = getAmortizationFirst2Years(currLoan, currRate, currTenure);
+        
+        // 計算新計劃首2年
+        let newData = getAmortizationFirst2Years(currLoan, newRate, currTenure); // 假設年期不變
+
+        // 計算回贈與成本
+        let cashBackAmount = currLoan * (cashBackPct / 100);
+        let totalRefinanceCost = legalFee + penalty;
+
+        // 轉按首兩年淨損益 = (舊利息 - 新利息) + 現金回贈 - 轉按成本
+        let interestSaved = currData.totalInterest - newData.totalInterest;
+        let netBenefit = interestSaved + cashBackAmount - totalRefinanceCost;
+
+        // 顯示結果
+        document.getElementById('outCurrInterest').innerText = '$' + Math.round(currData.totalInterest).toLocaleString();
+        document.getElementById('outCurrTotal').innerText = '$' + Math.round(currData.totalPayment).toLocaleString();
+
+        document.getElementById('outNewInterest').innerText = '$' + Math.round(newData.totalInterest).toLocaleString();
+        document.getElementById('outCashBack').innerText = '+$' + Math.round(cashBackAmount).toLocaleString();
+        document.getElementById('outCost').innerText = '-$' + Math.round(totalRefinanceCost).toLocaleString();
+
+        let verdictBox = document.getElementById('verdictBox');
+        if (netBenefit > 0) {
+            verdictBox.className = "verdict good";
+            verdictBox.innerHTML = `🎉 轉按划算！首 2 年預計可幫你慳返 <strong>$${Math.round(netBenefit).toLocaleString()}</strong>`;
+        } else {
+            verdictBox.className = "verdict bad";
+            verdictBox.innerHTML = `❌ 不建議轉按！轉按反而會令你損失 <strong>$${Math.round(Math.abs(netBenefit)).toLocaleString()}</strong>（利息差額不足以彌補手續費）`;
+        }
+
+        document.getElementById('resultCard').style.display = 'block';
+        // 滾動到結果位置
+        document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
