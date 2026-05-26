@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>物業轉按終極戰術計算機 v4.2 - 回贈扣本極速流</title>
+    <title>物業轉按終極策略沙盤 v5.0 - 終極客製儲存版</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -26,7 +26,7 @@
         }
 
         .container {
-            max-width: 1250px;
+            max-width: 1300px;
             margin: 0 auto;
         }
 
@@ -51,7 +51,7 @@
             gap: 20px;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
             .grid { grid-template-columns: 1fr; }
         }
 
@@ -85,7 +85,7 @@
 
         input, select {
             width: 100%;
-            padding: 10px;
+            padding: 8px 10px;
             border: 1px solid #cbd5e0;
             border-radius: 5px;
             box-sizing: border-box;
@@ -93,7 +93,16 @@
             background-color: #fff;
         }
 
-        button {
+        .save-status {
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--success-color);
+            font-weight: bold;
+            margin-top: -15px;
+            margin-bottom: 15px;
+        }
+
+        button.btn-calc {
             width: 100%;
             background-color: #8e44ad;
             color: white;
@@ -108,7 +117,29 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        button:hover { background-color: #7d3c98; }
+        button.btn-calc:hover { background-color: #7d3c98; }
+
+        /* 策略面板表 */
+        .panel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .panel-table th {
+            background-color: #edf2f7;
+            color: #4a5568;
+            padding: 6px;
+            text-align: center;
+        }
+        .panel-table td {
+            padding: 4px;
+            text-align: center;
+        }
+        .panel-table input {
+            padding: 4px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
 
         /* 終極戰術盒 */
         .strategy-box {
@@ -133,7 +164,7 @@
         .table-responsive {
             overflow-x: auto;
             margin-top: 15px;
-            max-height: 600px;
+            max-height: 400px;
             border: 1px solid #e2e8f0;
         }
 
@@ -142,7 +173,7 @@
             border-collapse: collapse;
             font-size: 0.85rem;
             text-align: right;
-            min-width: 950px;
+            min-width: 1000px;
         }
 
         thead th {
@@ -174,65 +205,70 @@
             border-radius: 4px;
             font-size: 0.75rem;
         }
-        .badge-reinvest {
-            background-color: var(--accent-color);
+        
+        /* 每月明細查閱區 */
+        .detail-select-zone {
+            background-color: #eaf2f8;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 25px;
+            border: 1px solid #aec6cf;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏠 物業轉按終極戰術計算機 v4.2</h1>
-    <div class="subtitle">🔄 模擬「無限循環轉按」＋「回贈扣減本金」複合雪球模型</div>
+    <h1>🏠 物業轉按終極策略沙盤 v5.0</h1>
+    <div class="subtitle">🔄 跨世代模擬模型：自訂每期成數/年期 + 記憶儲存 + 任意年份每月明細精查</div>
     
+    <div id="saveStatus" class="save-status">💾 數據已自動本地儲存</div>
+
     <div class="grid">
         <div class="card">
             <h2>1. 現有起點數據</h2>
             <div class="form-group">
                 <label for="startLoan">目前的剩餘貸款額 ($)</label>
-                <input type="number" id="startLoan" value="4000000">
+                <input type="number" id="startLoan" value="4000000" oninput="autoSaveAndRefreshFields()">
             </div>
             <div class="form-group">
                 <label for="currRate">若【不轉按】的按揭年利率 (%)</label>
-                <input type="number" id="currRate" value="4.125" step="0.001">
+                <input type="number" id="currRate" value="4.125" step="0.001" oninput="autoSaveAndRefreshFields()">
             </div>
             <div class="form-group">
                 <label for="startTenure">目前的剩餘供款年期 (年)</label>
-                <input type="number" id="startTenure" value="28">
+                <input type="number" id="startTenure" value="28" oninput="autoSaveAndRefreshFields()">
             </div>
-        </div>
-
-        <div class="card" style="border-top: 4px solid var(--accent-color);">
-            <h2>2. 未來「每2年無限轉按」參數設定</h2>
-            <div class="form-group">
-                <label for="loopRate">預估未來新按揭平均年利率 (%)</label>
-                <input type="number" id="loopRate" value="3.625" step="0.001">
+            
+            <h2 style="margin-top:20px;">2. 轉按全局預設 (用作快速填充下方列表)</h2>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group">
+                    <label for="loopRate">預設未來新利率 (%)</label>
+                    <input type="number" id="loopRate" value="3.625" step="0.001" oninput="updateAllCycleRows()">
+                </div>
+                <div class="form-group">
+                    <label for="loopTenure">預設每次重設年期</label>
+                    <input type="number" id="loopTenure" value="30" oninput="updateAllCycleRows()">
+                </div>
+                <div class="form-group">
+                    <label for="loopCashBack">預設每次回贈 (%)</label>
+                    <input type="number" id="loopCashBack" value="1.0" step="0.01" oninput="updateAllCycleRows()">
+                </div>
+                <div class="form-group">
+                    <label for="loopLegalFee">預設每次律師費 ($)</label>
+                    <input type="number" id="loopLegalFee" value="6000" oninput="updateAllCycleRows()">
+                </div>
             </div>
-            <div class="form-group">
-                <label for="loopTenure">每次轉按，是否重新拉長到 30 年？</label>
-                <select id="loopTenure">
-                    <option value="30" selected>係，每次都拉長回 30 年 (追求最低月供 + 最大防守力)</option>
-                    <option value="remain">唔係，每次都跟隨當時剩餘年期扣減 (只賺回贈同慳息)</option>
+            <div class="form-group" style="background-color: #fdf2e9; padding: 8px; border-radius: 5px; margin-top:5px;">
+                <label for="rebateAction" style="color: #d35400; font-weight: bold;">💰 現金回贈處理方式</label>
+                <select id="rebateAction" onchange="autoSaveAndRefreshFields()">
+                    <option value="keep">現金落袋 (保留作流動資金，本金依成數過檔)</option>
+                    <option value="reinvest" selected>🔥 全數扣減本金 (滾雪球：上期回贈直接用來扣減下期新本金)</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="loopCashBack">預估未來平均每次現金回贈 (%)</label>
-                <input type="number" id="loopCashBack" value="1.0" step="0.01">
-            </div>
-            <div class="form-group" style="background-color: #fdf2e9; padding: 10px; border-radius: 5px; border: 1px solid #f5cba7;">
-                <label for="rebateAction" style="color: #d35400; font-weight: bold;">💰 每次賺到的現金回贈點處理？</label>
-                <select id="rebateAction">
-                    <option value="keep">現金落袋 (保留作流動資金，按揭本金正常過檔)</option>
-                    <option value="reinvest" selected>🔥 全數扣減本金 (下次轉按時，用上期回贈扣減新按揭本金)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="loopLegalFee">預估平均每次轉按律師費 ($)</label>
-                <input type="number" id="loopLegalFee" value="6000">
-            </div>
-            <div class="form-group">
-                <label for="cycleCount">你想模擬未來連續循環轉按幾多次？</label>
-                <select id="cycleCount">
+                <label for="cycleCount" style="font-weight:bold; color:#8e44ad;">🔄 想連續循環轉按幾多次？ (每2年為一次)</label>
+                <select id="cycleCount" onchange="buildCycleInputsPanel(); autoSaveAndRefreshFields();">
                     <option value="3">連續轉 3 次 (睇 6 年效果)</option>
                     <option value="5" selected>連續轉 5 次 (睇 10 年效果)</option>
                     <option value="10">🔥 連續轉 10 次 (大長線：睇 20 年爆發力)</option>
@@ -240,47 +276,221 @@
                 </select>
             </div>
         </div>
+
+        <div class="card" style="border-top: 4px solid #2980b9;">
+            <h2>📋 每期轉按自訂面板 (可自由調整各期按揭成數/年期)</h2>
+            <p style="font-size:0.75rem; color:#666; margin-top:-5px;">* <b>成數調整比率</b>：100%代表順轉剩餘本金；調高（如110%）代表加按套現；調低（如90%）代表甩名減貸或自投本金減債。</p>
+            <div style="overflow-y:auto; max-height: 400px; border: 1px solid #edf2f7; border-radius: 5px; padding: 5px;">
+                <table class="panel-table">
+                    <thead>
+                        <tr>
+                            <th>期數</th>
+                            <th>新利率 (%)</th>
+                            <th>新按揭年期</th>
+                            <th>成數調整比率</th>
+                            <th>回贈 (%)</th>
+                            <th>律師費 ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cycleInputsBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <button onclick="runUltimateLoopModel()">🌀 啟動「無限循環轉按」滾雪球模型分析</button>
+    <button class="btn-calc" onclick="runUltimateLoopModel()">🌀 啟動「終極客製循環轉按」沙盤推演</button>
 
     <div class="card" id="resultArea" style="display:none;">
         <div class="strategy-box">
-            <h2>📊 【無限轉按流】vs【不轉按流】階段總結</h2>
-            <p>在未來的 <span id="summaryYears" style="font-weight:bold; color:#8e44ad;">0</span> 年內，如果你堅持實施「每兩年一轉」戰術，你將會經歷 <span id="summaryCycles" style="font-weight:bold; color:#8e44ad;">0</span> 次轉按：</p>
+            <h2>📊 【動態自訂轉按流】vs【方案 A：不轉按】階段總結</h2>
+            <p>在未來的 <span id="summaryYears" style="font-weight:bold; color:#8e44ad;">0</span> 年內，你執行了 <span id="summaryCycles" style="font-weight:bold; color:#8e44ad;">0</span> 次自訂轉按：</p>
             <ul>
-                <li>期間累計獲取的<b>現金回贈總額</b>：<span id="totalCashBackEarned" class="text-success" style="font-weight:bold;">$0</span> <span id="rebateNote" style="font-size:0.85rem; color:#666;"></span></li>
-                <li>期間累計付出的<b>總律師費成本</b>：<span id="totalLegalFeeCost" class="text-danger">-$0</span></li>
-                <li>期間因為利率較低<span id="interestNote"></span>，累計<b>幫你慳到的利息</b>：<span id="totalInterestSaved" class="text-success" style="font-weight:bold;">+$0</span></li>
+                <li>期間累計總獲取<b>現金回贈金額</b>：<span id="totalCashBackEarned" class="text-success" style="font-weight:bold;">$0</span> <span id="rebateNote" style="font-size:0.85rem; color:#666;"></span></li>
+                <li>期間累計付出<b>總律師費成本</b>：<span id="totalLegalFeeCost" class="text-danger">-$0</span></li>
+                <li>期間累計幫你<b>慳到/多付的利息</b>：<span id="totalInterestSaved" style="font-weight:bold;">+$0</span></li>
             </ul>
             <div id="ultimateVerdict" class="verdict good"></div>
         </div>
 
-        <h2>📅 滾雪球實戰全期對比明細表</h2>
-        
+        <h2>📅 滾雪球大盤兩年期對比明細表</h2>
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
                         <th class="text-center">時間</th>
-                        <th class="bg-curr" style="color:#7b341e; text-align:right;">【方案 A：不轉按】<br>當期剩餘本金</th>
-                        <th class="bg-curr" style="color:#7b341e; text-align:right;">【方案 A：不轉按】<br>當期2年利息支出</th>
-                        <th class="bg-loop" style="color:#1b5e20; text-align:right;">【方案 B：無限轉按】<br>當期起步本金</th>
-                        <th class="bg-loop" style="color:#1b5e20; text-align:right;">【方案 B：無限轉按】<br>當期2年利息支出</th>
-                        <th class="text-center">當期新獲回贈</th>
-                        <th class="text-center">當期律師費</th>
-                        <th class="text-success" style="text-align:right;">當期淨財富增長<br>(慳息+回贈-手續費)</th>
-                        <th style="text-align:right; background-color:#2c3e50; color:white;">累計總淨回報<br>(滾雪球戰果)</th>
+                        <th class="bg-curr" style="color:#7b341e;">【方案 A：不轉按】<br>期初剩餘本金</th>
+                        <th class="bg-curr" style="color:#7b341e;">【方案 A：不轉按】<br>當期2年利息支出</th>
+                        <th class="bg-loop" style="color:#1b5e20;">【方案 B：動態轉按】<br>當期調整後本金</th>
+                        <th class="bg-loop" style="color:#1b5e20;">【方案 B：動態轉按】<br>當期2年利息支出</th>
+                        <th class="text-center">新獲回贈</th>
+                        <th class="text-center">律師費</th>
+                        <th class="text-success">當期淨財富增長</th>
+                        <th style="background-color:#2c3e50; color:white;">累計總財富回報</th>
                     </tr>
                 </thead>
                 <tbody id="loopTableBody">
                     </tbody>
             </table>
         </div>
+
+        <div class="detail-select-zone">
+            <h3 style="margin-top:0; color:#2c3e50;">🔍 特定年份每月供款明細精查區</h3>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <label style="width: auto; font-size:1rem;">你想詳細查閱邊一年嘅每月供款對比？</label>
+                <select id="selectDetailYear" style="width: 200px;" onchange="renderMonthlyDetailTable()">
+                    </select>
+            </div>
+            
+            <div class="table-responsive" style="background:#fff; margin-top:12px; max-height:500px;">
+                <table style="min-width:1100px;">
+                    <thead>
+                        <tr style="background-color:#566573;">
+                            <th class="text-center" style="width:100px;">月份</th>
+                            <th class="bg-curr" style="color:#7b341e;">【方案A】月供</th>
+                            <th class="bg-curr" style="color:#7b341e;">【方案A】利息</th>
+                            <th class="bg-curr" style="color:#7b341e;">【方案A】本金</th>
+                            <th class="bg-curr" style="color:#7b341e;">【方案A】剩餘按揭</th>
+                            <th class="bg-loop" style="color:#1b5e20;">【方案B】月供</th>
+                            <th class="bg-loop" style="color:#1b5e20;">【方案B】利息</th>
+                            <th class="bg-loop" style="color:#1b5e20;">【方案B】本金</th>
+                            <th class="bg-loop" style="color:#1b5e20;">【方案B】剩餘按揭</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthlyDetailTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <script>
+    // 全局流水賬記憶體，用嚟塞滿30年內每個月嘅數
+    let globalMonthlyLogA = [];
+    let globalMonthlyLogB = [];
+
+    window.onload = function() {
+        loadSavedData();
+        buildCycleInputsPanel();
+        loadSavedCycleData();
+    };
+
+    function autoSaveAndRefreshFields() {
+        let data = {
+            startLoan: document.getElementById('startLoan').value,
+            currRate: document.getElementById('currRate').value,
+            startTenure: document.getElementById('startTenure').value,
+            loopRate: document.getElementById('loopRate').value,
+            loopTenure: document.getElementById('loopTenure').value,
+            loopCashBack: document.getElementById('loopCashBack').value,
+            loopLegalFee: document.getElementById('loopLegalFee').value,
+            rebateAction: document.getElementById('rebateAction').value,
+            cycleCount: document.getElementById('cycleCount').value
+        };
+        localStorage.setItem('refi_v5_global_data', JSON.stringify(data));
+        flashSaveStatus();
+    }
+
+    function saveCycleRowsData() {
+        let cycleCount = parseInt(document.getElementById('cycleCount').value);
+        let rowsData = [];
+        for(let i=1; i<=cycleCount; i++) {
+            rowsData.push({
+                rate: document.getElementById(`rate_c${i}`).value,
+                tenure: document.getElementById(`tenure_c${i}`).value,
+                ratio: document.getElementById(`ratio_c${i}`).value,
+                cb: document.getElementById(`cb_c${i}`).value,
+                fee: document.getElementById(`fee_c${i}`).value
+            });
+        }
+        localStorage.setItem('refi_v5_cycles_data', JSON.stringify(rowsData));
+        flashSaveStatus();
+    }
+
+    function loadSavedData() {
+        let saved = localStorage.getItem('refi_v5_global_data');
+        if(!saved) return;
+        let d = JSON.parse(saved);
+        if(d.startLoan) document.getElementById('startLoan').value = d.startLoan;
+        if(d.currRate) document.getElementById('currRate').value = d.currRate;
+        if(d.startTenure) document.getElementById('startTenure').value = d.startTenure;
+        if(d.loopRate) document.getElementById('loopRate').value = d.loopRate;
+        if(d.loopTenure) document.getElementById('loopTenure').value = d.loopTenure;
+        if(d.loopCashBack) document.getElementById('loopCashBack').value = d.loopCashBack;
+        if(d.loopLegalFee) document.getElementById('loopLegalFee').value = d.loopLegalFee;
+        if(d.rebateAction) document.getElementById('rebateAction').value = d.rebateAction;
+        if(d.cycleCount) document.getElementById('cycleCount').value = d.cycleCount;
+    }
+
+    function loadSavedCycleData() {
+        let saved = localStorage.getItem('refi_v5_cycles_data');
+        if(!saved) return;
+        let rows = JSON.parse(saved);
+        let cycleCount = parseInt(document.getElementById('cycleCount').value);
+        for(let i=1; i<=cycleCount; i++) {
+            if(rows[i-1]) {
+                if(document.getElementById(`rate_c${i}`)) document.getElementById(`rate_c${i}`).value = rows[i-1].rate;
+                if(document.getElementById(`tenure_c${i}`)) document.getElementById(`tenure_c${i}`).value = rows[i-1].tenure;
+                if(document.getElementById(`ratio_c${i}`)) document.getElementById(`ratio_c${i}`).value = rows[i-1].ratio;
+                if(document.getElementById(`cb_c${i}`)) document.getElementById(`cb_c${i}`).value = rows[i-1].cb;
+                if(document.getElementById(`fee_c${i}`)) document.getElementById(`fee_c${i}`).value = rows[i-1].fee;
+            }
+        }
+    }
+
+    function flashSaveStatus() {
+        let status = document.getElementById('saveStatus');
+        status.innerText = "⚡ 數據已即時同步自動儲存";
+        status.style.color = "#e67e22";
+        setTimeout(() => {
+            status.innerText = "💾 數據已安全本地鎖定";
+            status.style.color = "#27ae60";
+        }, 800);
+    }
+
+    function buildCycleInputsPanel() {
+        let cycleCount = parseInt(document.getElementById('cycleCount').value);
+        let tbody = document.getElementById('cycleInputsBody');
+        tbody.innerHTML = '';
+
+        let gRate = document.getElementById('loopRate').value;
+        let gTenure = document.getElementById('loopTenure').value;
+        let gCB = document.getElementById('loopCashBack').value;
+        let gFee = document.getElementById('loopLegalFee').value;
+
+        for (let i = 1; i <= cycleCount; i++) {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-weight:bold; color:#2980b9;">C${i}<br><span style="font-size:10px; color:#666;">第${(i-1)*2+1}-${i*2}年</span></td>
+                <td><input type="number" id="rate_c${i}" value="${gRate}" step="0.001" style="width:70px;" oninput="saveCycleRowsData()"></td>
+                <td><input type="number" id="tenure_c${i}" value="${gTenure}" style="width:55px;" oninput="saveCycleRowsData()"></td>
+                <td><input type="number" id="ratio_c${i}" value="100" style="width:60px;" oninput="saveCycleRowsData()"> %</td>
+                <td><input type="number" id="cb_c${i}" value="${gCB}" step="0.01" style="width:60px;" oninput="saveCycleRowsData()"></td>
+                <td><input type="number" id="fee_c${i}" value="${gFee}" style="width:70px;" oninput="saveCycleRowsData()"></td>
+            `;
+            tbody.appendChild(tr);
+        }
+    }
+
+    function updateAllCycleRows() {
+        autoSaveAndRefreshFields();
+        let cycleCount = parseInt(document.getElementById('cycleCount').value);
+        let gRate = document.getElementById('loopRate').value;
+        let gTenure = document.getElementById('loopTenure').value;
+        let gCB = document.getElementById('loopCashBack').value;
+        let gFee = document.getElementById('loopLegalFee').value;
+
+        for (let i = 1; i <= cycleCount; i++) {
+            document.getElementById(`rate_c${i}`).value = gRate;
+            document.getElementById(`tenure_c${i}`).value = gTenure;
+            document.getElementById(`cb_c${i}`).value = gCB;
+            document.getElementById(`fee_c${i}`).value = gFee;
+        }
+        saveCycleRowsData();
+    }
+
     function getPmt(principal, annualRate, years) {
         if (years <= 0 || principal <= 0) return 0;
         let r = (annualRate / 100) / 12;
@@ -289,113 +499,161 @@
         return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
     }
 
-    function run24Months(principal, annualRate, years) {
-        if (years <= 0 || principal <= 0) {
-            return { interest: 0, endBalance: 0 };
-        }
-        
-        let r = (annualRate / 100) / 12;
-        let pmt = getPmt(principal, annualRate, years);
-        let currentBalance = principal;
-        let totalInterest2Years = 0;
-
-        for (let m = 1; m <= 24; m++) {
-            if (currentBalance <= 0) {
-                currentBalance = 0;
-                break;
-            }
-            let interestPaid = currentBalance * r;
-            let principalPaid = pmt - interestPaid;
-            
-            if (principalPaid > currentBalance) {
-                principalPaid = currentBalance;
-            }
-            
-            totalInterest2Years += interestPaid;
-            currentBalance -= principalPaid;
-        }
-        if (currentBalance < 0) currentBalance = 0;
-        return { interest: totalInterest2Years, endBalance: currentBalance };
-    }
-
     function runUltimateLoopModel() {
         let startLoan = parseFloat(document.getElementById('startLoan').value) || 0;
         let currRate = parseFloat(document.getElementById('currRate').value) || 0;
         let startTenure = parseInt(document.getElementById('startTenure').value) || 0;
-
-        let loopRate = parseFloat(document.getElementById('loopRate').value) || 0;
-        let loopTenureOpt = document.getElementById('loopTenure').value;
-        let loopCashBackPct = parseFloat(document.getElementById('loopCashBack').value) || 0;
         let rebateAction = document.getElementById('rebateAction').value;
-        let loopLegalFee = parseFloat(document.getElementById('loopLegalFee').value) || 0;
         let cycleCount = parseInt(document.getElementById('cycleCount').value) || 1;
 
         if (startLoan <= 0 || startTenure <= 0) {
-            alert('請填寫正確的基礎按揭數據。');
+            alert('請填寫正確的起點貸款數據。');
             return;
         }
 
+        // 清空全域流水賬
+        globalMonthlyLogA = [];
+        globalMonthlyLogB = [];
+
+        let totalMonthsToSimulate = cycleCount * 2 * 12;
+
+        // --- 方案 A (完全不動，一供到底) 全期流水賬模擬 ---
+        let balanceA = startLoan;
+        let tenureMonthsA = startTenure * 12;
+        let rA = (currRate / 100) / 12;
+        
+        for (let m = 1; m <= totalMonthsToSimulate; m++) {
+            let pmtA = 0;
+            let intA = 0;
+            let prinA = 0;
+            
+            if (balanceA > 0 && tenureMonthsA > 0) {
+                // 每次動態重新計返當時定額月供，確保同大局同步
+                pmtA = (balanceA * rA * Math.pow(1 + rA, tenureMonthsA)) / (Math.pow(1 + rA, tenureMonthsA) - 1);
+                intA = balanceA * rA;
+                prinA = pmtA - intA;
+                if (prinA > balanceA) { prinA = balanceA; pmtA = intA + prinA; }
+                balanceA -= prinA;
+                tenureMonthsA--;
+            }
+            if (balanceA < 0) balanceA = 0;
+
+            globalMonthlyLogA.push({
+                monthIndex: m,
+                payment: pmtA,
+                interest: intA,
+                principal: prinA,
+                endingBalance: balanceA
+            });
+        }
+
+        // --- 方案 B (每兩年自訂爆發轉按) 全期流水賬模擬 ---
         let tableBody = document.getElementById('loopTableBody');
         tableBody.innerHTML = '';
 
-        let currentBalanceA = startLoan;
-        let currentBalanceB = startLoan;
+        let balanceB = startLoan;
+        let prevCashBack = 0;
         
         let cumCashBack = 0;
         let cumLegalFee = 0;
-        let cumInterestSaved = 0;
+        let cumInterestA = 0;
+        let cumInterestB = 0;
         let cumNetProfit = 0;
-
-        let tenureA = startTenure;
-        let tenureB = startTenure;
-        
-        let prevCashBack = 0; // 用作儲存上一期嘅回贈
 
         for (let i = 1; i <= cycleCount; i++) {
             let yearLabel = `第 ${(i-1)*2 + 1}-${i*2} 年`;
             
-            // 執行方案 A (不轉按)
-            let resA = run24Months(currentBalanceA, currRate, tenureA);
-            tenureA -= 2;
-            if (tenureA < 0) tenureA = 0;
+            // 載入這一期自訂面板面板嘅參數
+            let cRate = parseFloat(document.getElementById(`rate_c${i}`).value) || 0;
+            let cTenure = parseInt(document.getElementById(`tenure_c${i}`).value) || 0;
+            let cRatio = parseFloat(document.getElementById(`ratio_c${i}`).value) || 100;
+            let cCBpct = parseFloat(document.getElementById(`cb_c${i}`).value) || 0;
+            let cFee = parseFloat(document.getElementById(`fee_c${i}`).value) || 0;
 
-            // 【核心邏輯】：如果選擇咗「回贈扣本」，喺第2次轉按起，將上期回贈扣減新按揭本金
+            let origBalanceBBeforeAction = balanceB;
             let injectedMsg = "";
             let actionClass = "highlight-cycle";
-            if (rebateAction === 'reinvest' && i > 1 && currentBalanceB > 0 && prevCashBack > 0) {
-                currentBalanceB -= prevCashBack;
-                if (currentBalanceB < 0) currentBalanceB = 0;
-                injectedMsg = ` 💥 注入上期回贈 $${Math.round(prevCashBack).toLocaleString()} 扣減本金！`;
-                actionClass = "highlight-reinvest";
+
+            if (balanceB > 0) {
+                // 1. 如果揀扣減本金
+                if (rebateAction === 'reinvest' && i > 1 && prevCashBack > 0) {
+                    balanceB -= prevCashBack;
+                    injectedMsg += `💥 扣減上期回贈 $${Math.round(prevCashBack).toLocaleString()}；`;
+                    actionClass = "highlight-reinvest";
+                }
+                // 2. 應用成數調整比率
+                if (cRatio !== 100) {
+                    let oldB = balanceB;
+                    balanceB = balanceB * (cRatio / 100);
+                    let diff = balanceB - oldB;
+                    injectedMsg += diff > 0 ? `💰 加按套現 $${Math.round(diff).toLocaleString()}；` : `📉 自下本金減貸 $${Math.round(Math.abs(diff)).toLocaleString()}；`;
+                    actionClass = "highlight-reinvest";
+                }
+            } else {
+                balanceB = 0;
             }
 
-            let currentTermB = (loopTenureOpt === '30') ? 30 : tenureB;
-            
-            // 計算當期回贈
-            let thisCashBack = currentBalanceB > 0 ? currentBalanceB * (loopCashBackPct / 100) : 0;
-            let thisLegalFee = currentBalanceB > 0 ? loopLegalFee : 0;
-            
-            // 執行方案 B (無限轉按)
-            let resB = run24Months(currentBalanceB, loopRate, currentTermB);
-            
-            let thisInterestSaved = resA.interest - resB.interest;
-            
-            // 淨財富增長計算：即使回贈扣減咗本金，呢筆錢依然係你嘅真實資產增長
+            if (balanceB < 0) balanceB = 0;
+            let startBalanceOfThisCycle = balanceB;
+
+            // 計算回贈同律師費支出
+            let thisCashBack = startBalanceOfThisCycle > 0 ? startBalanceOfThisCycle * (cCBpct / 100) : 0;
+            let thisLegalFee = startBalanceOfThisCycle > 0 ? cFee : 0;
+
+            // 跑呢 24 個月嘅單月供款流水賬
+            let rB = (cRate / 100) / 12;
+            let tenureMonthsB = cTenure * 12;
+            let interestPaidThisCycle = 0;
+
+            for (let m = 1; m <= 24; m++) {
+                let pmtB = 0;
+                let intB = 0;
+                let prinB = 0;
+
+                if (balanceB > 0 && tenureMonthsB > 0) {
+                    pmtB = (balanceB * rB * Math.pow(1 + rB, tenureMonthsB)) / (Math.pow(1 + rB, tenureMonthsB) - 1);
+                    intB = balanceB * rB;
+                    prinB = pmtB - intB;
+                    if (prinB > balanceB) { prinB = balanceB; pmtB = intB + prinB; }
+                    balanceB -= prinB;
+                    interestPaidThisCycle += intB;
+                    tenureMonthsB--;
+                }
+                if (balanceB < 0) balanceB = 0;
+
+                globalMonthlyLogB.push({
+                    monthIndex: ((i - 1) * 24) + m,
+                    payment: pmtB,
+                    interest: intB,
+                    principal: prinB,
+                    endingBalance: balanceB
+                });
+            }
+
+            // 抽返對應這2年方案 A 嘅總利息出嚟做對比
+            let interestPaidAThisCycle = 0;
+            for (let m = 1; m <= 24; m++) {
+                let idx = ((i - 1) * 24) + m - 1;
+                interestPaidAThisCycle += globalMonthlyLogA[idx].interest;
+            }
+
+            let thisInterestSaved = interestPaidAThisCycle - interestPaidThisCycle;
+            // 淨增長 = 慳息 + 回贈 - 律師費 (如果加按，套現舊錢會去咗戶口，本金雖然多咗，但呢度專注計套利淨利潤)
             let thisNetProfit = thisInterestSaved + thisCashBack - thisLegalFee;
 
             cumCashBack += thisCashBack;
             cumLegalFee += thisLegalFee;
-            cumInterestSaved += thisInterestSaved;
+            cumInterestA += interestPaidAThisCycle;
+            cumInterestB += interestPaidThisCycle;
             cumNetProfit += thisNetProfit;
 
-            // 輸出 Action 行
-            if (currentBalanceB > 0 || (currentBalanceB === 0 && prevCashBack > 0 && rebateAction === 'reinvest')) {
+            // 輸出主列表 UI Row
+            if (origBalanceBBeforeAction > 0) {
                 let trAction = document.createElement('tr');
                 trAction.className = actionClass;
-                let textCol = rebateAction === 'reinvest' && i > 1 ? '#d35400' : '#2980b9';
                 trAction.innerHTML = `
-                    <td colspan="9" class="text-center" style="color: ${textCol}; font-size:0.85rem;">
-                        🔄 【第 ${i} 次轉按執行】${injectedMsg}新按揭本金 $${Math.round(currentBalanceB).toLocaleString()} 過檔 ── 賺取本期新回贈 $${Math.round(thisCashBack).toLocaleString()}
+                    <td colspan="9" class="text-center" style="font-size:0.8rem; padding:6px;">
+                        🔄 【第 ${i} 次轉按點】${injectedMsg || "順利移交過檔 ──"} 觸發本期新回贈 $${Math.round(thisCashBack).toLocaleString()}
                     </td>
                 `;
                 tableBody.appendChild(trAction);
@@ -403,11 +661,11 @@
 
             let trData = document.createElement('tr');
             trData.innerHTML = `
-                <td class="text-center" style="font-weight:bold;">${yearLabel}<br><span class="badge ${rebateAction === 'reinvest' && i > 1 ? 'badge-reinvest' : ''}">Cycle ${i}</span></td>
-                <td class="bg-curr">$${Math.round(currentBalanceA).toLocaleString()}</td>
-                <td class="bg-curr">$${Math.round(resA.interest).toLocaleString()}</td>
-                <td class="bg-loop" style="font-weight:bold; color:#1b5e20;">$${Math.round(currentBalanceB).toLocaleString()}</td>
-                <td class="bg-loop">$${Math.round(resB.interest).toLocaleString()}</td>
+                <td class="text-center" style="font-weight:bold;">${yearLabel}<br><span class="badge">Cycle ${i}</span></td>
+                <td class="bg-curr">$${Math.round(globalMonthlyLogA[(i-1)*24].endingBalance + globalMonthlyLogA[(i-1)*24].principal).toLocaleString()}</td>
+                <td class="bg-curr">$${Math.round(interestPaidAThisCycle).toLocaleString()}</td>
+                <td class="bg-loop" style="font-weight:bold; color:#1b5e20;">$${Math.round(startBalanceOfThisCycle).toLocaleString()}</td>
+                <td class="bg-loop">$${Math.round(interestPaidThisCycle).toLocaleString()}</td>
                 <td class="text-center text-success">+$${Math.round(thisCashBack).toLocaleString()}</td>
                 <td class="text-center text-danger">-$${Math.round(thisLegalFee).toLocaleString()}</td>
                 <td class="text-right text-success" style="font-weight:600;">$${Math.round(thisNetProfit).toLocaleString()}</td>
@@ -415,37 +673,77 @@
             `;
             tableBody.appendChild(trData);
 
-            currentBalanceA = resA.endBalance;
-            currentBalanceB = resB.endBalance;
-            
-            // 儲存今期回贈，留畀下期用
             prevCashBack = thisCashBack;
-            
-            if (loopTenureOpt !== '30') {
-                tenureB -= 2;
-                if (tenureB < 0) tenureB = 0;
-            }
         }
 
+        // 大局總結更新
         document.getElementById('summaryYears').innerText = cycleCount * 2;
         document.getElementById('summaryCycles').innerText = cycleCount;
         document.getElementById('totalCashBackEarned').innerText = '$' + Math.round(cumCashBack).toLocaleString();
         document.getElementById('totalLegalFeeCost').innerText = '-$' + Math.round(cumLegalFee).toLocaleString();
-        document.getElementById('totalInterestSaved').innerText = '+$' + Math.round(cumInterestSaved).toLocaleString();
+        
+        let netIntSaved = cumInterestA - cumInterestB;
+        let intBox = document.getElementById('totalInterestSaved');
+        if (netIntSaved >= 0) {
+            intBox.innerText = '+$' + Math.round(netIntSaved).toLocaleString() + ' (順利慳利息)';
+            intBox.className = "text-success";
+        } else {
+            intBox.innerText = '-$' + Math.round(Math.abs(netIntSaved)).toLocaleString() + ' (因加按/調高利率而多付利息)';
+            intBox.className = "text-danger";
+        }
 
         if(rebateAction === 'reinvest') {
-            document.getElementById('rebateNote').innerText = "(已全數自動轉化為本金扣減)";
-            document.getElementById('interestNote').innerText = "及本金加速減少";
+            document.getElementById('rebateNote').innerText = "(已全數自動滾入本金扣減)";
         } else {
-            document.getElementById('rebateNote').innerText = "(全數現金落袋)";
-            document.getElementById('interestNote').innerText = "";
+            document.getElementById('rebateNote').innerText = "(全數現金留作流動資本)";
         }
 
         let verdictBox = document.getElementById('ultimateVerdict');
-        verdictBox.innerHTML = `🚀 滾雪球戰略成果：未來 ${cycleCount * 2} 年透過「每兩年一轉按」，你預計可以比完全不轉按，**額外幫自己創造 $${Math.round(cumNetProfit).toLocaleString()} 嘅實質淨財富**！`;
+        verdictBox.innerHTML = `🚀 綜合推演回報：未來 ${cycleCount * 2} 年透過此套動態自訂轉按戰術，你將比完全躺平不轉按，**額外幫大局斬獲 $${Math.round(cumNetProfit).toLocaleString()} 嘅實質財富淨空間**！`;
+
+        // 動態生成特定年份細查選單
+        let selectYear = document.getElementById('selectDetailYear');
+        selectYear.innerHTML = '';
+        for (let y = 1; y <= cycleCount * 2; y++) {
+            let opt = document.createElement('option');
+            opt.value = y;
+            opt.innerText = `第 ${y} 年`;
+            if(y === 15 || (y === cycleCount * 2 && y < 15)) opt.selected = true; // 預設跳去第15年或最尾一年
+            selectYear.appendChild(opt);
+        }
 
         document.getElementById('resultArea').style.display = 'block';
+        renderMonthlyDetailTable();
         document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderMonthlyDetailTable() {
+        let selectedYear = parseInt(document.getElementById('selectDetailYear').value) || 1;
+        let tbody = document.getElementById('monthlyDetailTableBody');
+        tbody.innerHTML = '';
+
+        let startMonthIdx = (selectedYear - 1) * 12; // 0-based index
+
+        for (let m = 0; m < 12; m++) {
+            let targetIdx = startMonthIdx + m;
+            let logA = globalMonthlyLogA[targetIdx];
+            let logB = globalMonthlyLogB[targetIdx];
+
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="text-center" style="font-weight:bold; background-color:#f2f4f4;">第 ${m+1} 個月</td>
+                <td class="bg-curr text-danger">$${Math.round(logA.payment).toLocaleString()}</td>
+                <td class="bg-curr">$${Math.round(logA.interest).toLocaleString()}</td>
+                <td class="bg-curr">$${Math.round(logA.principal).toLocaleString()}</td>
+                <td class="bg-curr" style="font-weight:600;">$${Math.round(logA.endingBalance).toLocaleString()}</td>
+                
+                <td class="bg-loop text-success" style="font-weight:600;">$${Math.round(logB.payment).toLocaleString()}</td>
+                <td class="bg-loop">$${Math.round(logB.interest).toLocaleString()}</td>
+                <td class="bg-loop">$${Math.round(logB.principal).toLocaleString()}</td>
+                <td class="bg-loop" style="font-weight:bold; color:#1b5e20;">$${Math.round(logB.endingBalance).toLocaleString()}</td>
+            `;
+            tbody.appendChild(tr);
+        }
     }
 </script>
 
