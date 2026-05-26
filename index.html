@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>物業轉按終極戰術計算機 v4.0 - 無限循環流</title>
+    <title>物業轉按終極戰術計算機 v4.1 - 超長線無限循環流</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -25,7 +25,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1250px;
             margin: 0 auto;
         }
 
@@ -132,6 +132,8 @@
         .table-responsive {
             overflow-x: auto;
             margin-top: 15px;
+            max-height: 600px; /* 超長表格增加滾動條方便查閱 */
+            border: 1px solid #e2e8f0;
         }
 
         table {
@@ -139,19 +141,22 @@
             border-collapse: collapse;
             font-size: 0.85rem;
             text-align: right;
-            min-width: 900px;
+            min-width: 950px;
         }
 
-        th {
+        thead th {
+            position: sticky;
+            top: 0;
             background-color: #34495e;
             color: white;
             padding: 12px 10px;
             font-weight: 500;
+            z-index: 10;
         }
 
         tr:nth-child(even) { background-color: #f8fafc; }
-        tr.highlight-cycle { background-color: #eaf2f8; font-weight: bold; }
-        td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
+        tr.highlight-cycle { background-color: #e1f5fe; font-weight: bold; }
+        td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
         
         .text-center { text-align: center; }
         .text-danger { color: var(--danger-color); font-weight: 600; }
@@ -172,8 +177,8 @@
 <body>
 
 <div class="container">
-    <h1>🏠 物業轉按終極戰術計算機 v4.0</h1>
-    <div class="subtitle">🔄 模擬「每兩年無限循環轉按」滾雪球套利模型</div>
+    <h1>🏠 物業轉按終極戰術計算機 v4.1</h1>
+    <div class="subtitle">🔄 模擬「每兩年無限循環轉按」滾雪球套利模型（增強長線版）</div>
     
     <div class="grid">
         <div class="card">
@@ -221,6 +226,8 @@
                     <option value="3" selected>連續轉 3 次 (睇 6 年效果)</option>
                     <option value="4">連續轉 4 次 (睇 8 年效果)</option>
                     <option value="5">連續轉 5 次 (睇 10 年效果)</option>
+                    <option value="10">🔥 連續轉 10 次 (大長線：睇 20 年爆發力)</option>
+                    <option value="15">🪐 連續轉 15 次 (終極戰：睇 30 年跨世代戰果)</option>
                 </select>
             </div>
         </div>
@@ -241,7 +248,7 @@
         </div>
 
         <h2>📅 滾雪球實戰全期對比明細表</h2>
-        <p style="font-size:0.85rem; color:#666;">* 下表為你精準模擬每兩年「重設遊戲」時的真實本金變化。藍色橫條代表<b>轉按執行點</b>，此時本金會被帶入新一輪計算，並觸發回贈與律師費支出。</p>
+        <p style="font-size:0.85rem; color:#666;">* 下表為你精準模擬每兩年「重設遊戲」時的真實本金變化。藍色橫條代表<b>轉按執行點</b>。若起點設定年期較短，中後期本金歸零後會自動停止運算，確保數據絕對真實。</p>
         
         <div class="table-responsive">
             <table>
@@ -255,7 +262,7 @@
                         <th class="text-center">當期新獲回贈</th>
                         <th class="text-center">當期律師費</th>
                         <th class="text-success" style="text-align:right;">當期淨利潤<br>(慳息+回贈-手續費)</th>
-                        <th style="text-align:right; background-color:#2c3e50;">累計總淨回報<br>(滾雪球戰果)</th>
+                        <th style="text-align:right; background-color:#2c3e50; color:white;">累計總淨回報<br>(滾雪球戰果)</th>
                     </tr>
                 </thead>
                 <tbody id="loopTableBody">
@@ -267,6 +274,7 @@
 
 <script>
     function getPmt(principal, annualRate, years) {
+        if (years <= 0 || principal <= 0) return 0;
         let r = (annualRate / 100) / 12;
         let n = years * 12;
         if (r === 0) return principal / n;
@@ -274,15 +282,29 @@
     }
 
     function run24Months(principal, annualRate, years) {
+        // 安全防線：如果年期或本金已經歸零，直接回傳零
+        if (years <= 0 || principal <= 0) {
+            return { interest: 0, endBalance: 0 };
+        }
+        
         let r = (annualRate / 100) / 12;
         let pmt = getPmt(principal, annualRate, years);
         let currentBalance = principal;
         let totalInterest2Years = 0;
 
         for (let m = 1; m <= 24; m++) {
-            if (currentBalance <= 0) break;
+            if (currentBalance <= 0) {
+                currentBalance = 0;
+                break;
+            }
             let interestPaid = currentBalance * r;
             let principalPaid = pmt - interestPaid;
+            
+            // 如果最後供款額大過剩餘本金，進行修正
+            if (principalPaid > currentBalance) {
+                principalPaid = currentBalance;
+            }
+            
             totalInterest2Years += interestPaid;
             currentBalance -= principalPaid;
         }
@@ -323,15 +345,18 @@
         for (let i = 1; i <= cycleCount; i++) {
             let yearLabel = `第 ${(i-1)*2 + 1}-${i*2} 年`;
             
+            // 執行方案 A (不轉按)
             let resA = run24Months(currentBalanceA, currRate, tenureA);
             tenureA -= 2;
             if (tenureA < 0) tenureA = 0;
 
+            // 執行方案 B (無限轉按)
             let currentTermB = (loopTenureOpt === '30') ? 30 : tenureB;
             let resB = run24Months(currentBalanceB, loopRate, currentTermB);
             
-            let thisCashBack = currentBalanceB * (loopCashBackPct / 100);
-            let thisLegalFee = loopLegalFee;
+            // 計算當期回贈 (若本金已扣到 0 就不再有回贈與律師費)
+            let thisCashBack = currentBalanceB > 0 ? currentBalanceB * (loopCashBackPct / 100) : 0;
+            let thisLegalFee = currentBalanceB > 0 ? loopLegalFee : 0;
             let thisInterestSaved = resA.interest - resB.interest;
             let thisNetProfit = thisInterestSaved + thisCashBack - thisLegalFee;
 
@@ -340,14 +365,17 @@
             cumInterestSaved += thisInterestSaved;
             cumNetProfit += thisNetProfit;
 
-            let trAction = document.createElement('tr');
-            trAction.className = "highlight-cycle";
-            trAction.innerHTML = `
-                <td colspan="9" class="text-center" style="color: #2980b9; font-size:0.8rem; background-color:#e1f5fe;">
-                    🔄 【第 ${i} 次轉按執行】成功投奔新銀行 ── 賺取新一輪 ${loopCashBackPct}% 回贈，重設合約
-                </td>
-            `;
-            tableBody.appendChild(trAction);
+            // 只有在本金還大於 0 時才顯示轉按動作條
+            if (currentBalanceB > 0) {
+                let trAction = document.createElement('tr');
+                trAction.className = "highlight-cycle";
+                trAction.innerHTML = `
+                    <td colspan="9" class="text-center" style="color: #2980b9; font-size:0.8rem;">
+                        🔄 【第 ${i} 次轉按執行】按揭本金 $${Math.round(currentBalanceB).toLocaleString()} 順利過檔 ── 穩賺 $${Math.round(thisCashBack).toLocaleString()} 現金回贈
+                    </td>
+                `;
+                tableBody.appendChild(trAction);
+            }
 
             let trData = document.createElement('tr');
             trData.innerHTML = `
