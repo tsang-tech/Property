@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>精明業主：兩年一轉按無限循環計算機</title>
+    <title>物業轉按終極戰術計算機 v4.0 - 無限循環流</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -25,7 +25,7 @@
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -38,9 +38,10 @@
         
         .subtitle {
             text-align: center;
-            color: #666;
+            color: #555;
             margin-bottom: 25px;
             font-size: 0.95rem;
+            font-weight: bold;
         }
 
         .grid {
@@ -81,42 +82,44 @@
             color: #4a5568;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             border: 1px solid #cbd5e0;
             border-radius: 5px;
             box-sizing: border-box;
             font-size: 0.95rem;
+            background-color: #fff;
         }
 
         button {
             width: 100%;
-            background-color: var(--secondary-color);
+            background-color: #8e44ad;
             color: white;
             border: none;
-            padding: 14px;
+            padding: 15px;
             font-size: 1.1rem;
             font-weight: bold;
             border-radius: 5px;
             cursor: pointer;
             transition: background 0.2s;
             margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        button:hover { background-color: #1f618d; }
+        button:hover { background-color: #7d3c98; }
 
-        /* 核心兩年策略盒 */
+        /* 終極戰術盒 */
         .strategy-box {
-            background-color: #f0fdf4;
-            border: 2px solid #bbf7d0;
+            background-color: #f5eef8;
+            border: 2px solid #d7bde2;
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 8px;
         }
 
         .verdict {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: bold;
             text-align: center;
             padding: 15px;
@@ -124,7 +127,6 @@
             margin-top: 15px;
         }
         .good { background-color: #def7ec; color: #03543f; border: 1px solid #31c48d; }
-        .bad { background-color: #fde8e8; color: #9b1c1c; border: 1px solid #f8b4b4; }
 
         /* 表格樣式 */
         .table-responsive {
@@ -137,120 +139,126 @@
             border-collapse: collapse;
             font-size: 0.85rem;
             text-align: right;
-            min-width: 800px;
+            min-width: 900px;
         }
 
         th {
-            background-color: var(--primary-color);
+            background-color: #34495e;
             color: white;
-            padding: 10px;
+            padding: 12px 10px;
             font-weight: 500;
         }
 
         tr:nth-child(even) { background-color: #f8fafc; }
-        td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
+        tr.highlight-cycle { background-color: #eaf2f8; font-weight: bold; }
+        td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
         
         .text-center { text-align: center; }
         .text-danger { color: var(--danger-color); font-weight: 600; }
         .text-success { color: var(--success-color); font-weight: 600; }
         
         .bg-curr { background-color: #fffaf0; }
-        .bg-new { background-color: #f0fdf4; }
-
-        /* 兩年轉按分界線樣式 */
-        tr.milestone-row {
-            background-color: #e0f2fe !important;
-            border-bottom: 3px dashed #0284c7;
-        }
-        tr.milestone-row td {
-            font-weight: bold;
-            color: #0369a1;
-            padding: 12px 10px;
+        .bg-loop { background-color: #f4fdf7; }
+        
+        .badge {
+            background-color: #2980b9;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏠 智慧轉按計算機 v3.0</h1>
-    <div class="subtitle">🎯 專為「每兩年一轉」套現回贈及優化息率策略而設</div>
+    <h1>🏠 物業轉按終極戰術計算機 v4.0</h1>
+    <div class="subtitle">🔄 模擬「每兩年無限循環轉按」滾雪球套利模型</div>
     
     <div class="grid">
         <div class="card">
-            <h2>1. 現有按揭（維持現狀）</h2>
+            <h2>1. 現有起點數據</h2>
             <div class="form-group">
-                <label for="currLoan">現時剩餘貸款額 ($)</label>
-                <input type="number" id="currLoan" value="4000000">
+                <label for="startLoan">目前的剩餘貸款額 ($)</label>
+                <input type="number" id="startLoan" value="4000000">
             </div>
             <div class="form-group">
-                <label for="currRate">現時按揭年利率 (%)</label>
+                <label for="currRate">若【不轉按】的按揭年利率 (%)</label>
                 <input type="number" id="currRate" value="4.125" step="0.001">
             </div>
             <div class="form-group">
-                <label for="currTenure">原本剩餘供款年期 (年)</label>
-                <input type="number" id="currTenure" value="28">
+                <label for="startTenure">目前的剩餘供款年期 (年)</label>
+                <input type="number" id="startTenure" value="28">
             </div>
         </div>
 
         <div class="card">
-            <h2>2. 轉按新計劃（兩年後可再轉）</h2>
+            <h2>2. 未來「每2年無限轉按」參數設定</h2>
             <div class="form-group">
-                <label for="newRate">新按揭年利率 (%)</label>
-                <input type="number" id="newRate" value="3.625" step="0.001">
+                <label for="loopRate">預估未來新按揭平均年利率 (%)</label>
+                <input type="number" id="loopRate" value="3.625" step="0.001">
             </div>
             <div class="form-group">
-                <label for="newTenure">新按揭年期 (年) *通常拉長回30年爭取低供款</label>
-                <input type="number" id="newTenure" value="30">
+                <label for="loopTenure">每次轉按，是否重新拉長到 30 年？</label>
+                <select id="loopTenure">
+                    <option value="30" selected>係，每次都拉長回 30 年 (追求最低月供 + 最大防守力)</option>
+                    <option value="remain">唔係，每次都跟隨當時剩餘年期扣減 (只賺回贈同慳息)</option>
+                </select>
             </div>
             <div class="form-group">
-                <label for="cashBack">新銀行現金回贈 (%)</label>
-                <input type="number" id="cashBack" value="1" step="0.01">
+                <label for="loopCashBack">預估未來平均每次現金回贈 (%)</label>
+                <input type="number" id="loopCashBack" value="1.0" step="0.01">
             </div>
             <div class="form-group">
-                <label for="legalFee">轉按手續費/律師費 ($)</label>
-                <input type="number" id="legalFee" value="6000">
+                <label for="loopLegalFee">預估平均每次轉按律師費 ($)</label>
+                <input type="number" id="loopLegalFee" value="6000">
+            </div>
+            <div class="form-group">
+                <label for="cycleCount">你想模擬未來連續循環轉按幾多次？ (每2年為一次)</label>
+                <select id="cycleCount">
+                    <option value="1">轉 1 次 (睇 2 年效果)</option>
+                    <option value="2">連續轉 2 次 (睇 4 年效果)</option>
+                    <option value="3" selected>連續轉 3 次 (睇 6 年效果)</option>
+                    <option value="4">連續轉 4 次 (睇 8 年效果)</option>
+                    <option value="5">連續轉 5 次 (睇 10 年效果)</option>
+                </select>
             </div>
         </div>
     </div>
 
-    <button onclick="generateTwoYearStrategy()">📈 執行「兩年期罰息越過策略」分析</button>
+    <button onclick="runUltimateLoopModel()">🌀 啟動「無限循環轉按」滾雪球模型分析</button>
 
     <div class="card" id="resultArea" style="display:none;">
         <div class="strategy-box">
-            <h2>🎯 「每兩年轉按一次」核心戰術成果</h2>
-            <p>既然你打算每兩年就再轉按，我哋只需計算<b>首 2 年（罰息期內）</b>的實質淨損益。這樣最能反映短期套利效果：</p>
+            <h2>📊 【無限轉按流】vs【不轉按流】階段總結</h2>
+            <p>在未來的 <span id="summaryYears" style="font-weight:bold; color:#8e44ad;">0</span> 年內，如果你堅持實施「每兩年一轉」戰術，你將會經歷 <span id="summaryCycles" style="font-weight:bold; color:#8e44ad;">0</span> 次轉按：</p>
             <ul>
-                <li>首 2 年舊計劃總利息開支：<span id="twoYearCurrInt" style="font-weight:bold;">$0</span></li>
-                <li>首 2 年新計劃總利息開支：<span id="twoYearNewInt" style="font-weight:bold;">$0</span>（新利率幫你慳咗 <span id="twoYearIntSaved" class="text-success">$0</span> 利息）</li>
-                <li>新銀行現金回贈（即時落袋）：<span id="twoYearCashBack" class="text-success">+$0</span></li>
-                <li>本次轉按手續費（律師費等）：<span id="twoYearCost" class="text-danger">-$0</span></li>
+                <li>期間累計自動穩袋的<b>現金回贈總額</b>：<span id="totalCashBackEarned" class="text-success" style="font-weight:bold;">$0</span></li>
+                <li>期間累計付出的<b>總律師費成本</b>：<span id="totalLegalFeeCost" class="text-danger">-$0</span></li>
+                <li>期間因為利率較低，累計<b>幫你慳到的利息</b>：<span id="totalInterestSaved" class="text-success">+$0</span></li>
             </ul>
-            <div id="strategyVerdict" class="verdict"></div>
+            <div id="ultimateVerdict" class="verdict good"></div>
         </div>
 
-        <h2>📅 30年長期供款趨勢對比表（附 2 年轉按檢視線）</h2>
-        <p style="font-size:0.85rem; color:#666;">* 觀察藍色虛線。如果你每兩年就轉一次，你其實只需要賺取虛線以上的利益，就可以在第 2 年底重設遊戲，再次轉按賺下一次回贈！</p>
+        <h2>📅 滾雪球實戰全期對比明細表</h2>
+        <p style="font-size:0.85rem; color:#666;">* 下表為你精準模擬每兩年「重設遊戲」時的真實本金變化。藍色橫條代表<b>轉按執行點</b>，此時本金會被帶入新一輪計算，並觸發回贈與律師費支出。</p>
         
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th rowspan="2" style="text-align:center; background-color:#1a252f;">年份</th>
-                        <th colspan="3" class="bg-curr" style="color:#7b341e; text-align:center;">方案 A：保持現狀 (剩<span class="lblCurrTen">28</span>年)</th>
-                        <th colspan="3" class="bg-new" style="color:#1b5e20; text-align:center;">方案 B：選擇轉按 (全新<span class="lblNewTen">30</span>年)</th>
-                        <th rowspan="2" style="text-align:center; background-color:#1a252f;">每期供款相差<br>(A - B)</th>
-                        <th rowspan="2" style="text-align:center; background-color:#1a252f;">累計利息差額<br>(+為新計劃慳咗)</th>
-                    </tr>
-                    <tr>
-                        <th class="bg-curr" style="color:#7b341e;">每月供款</th>
-                        <th class="bg-curr" style="color:#7b341e;">當年利息</th>
-                        <th class="bg-curr" style="color:#7b341e;">年末本金</th>
-                        <th class="bg-new" style="color:#1b5e20;">每月供款</th>
-                        <th class="bg-new" style="color:#1b5e20;">當年利息</th>
-                        <th class="bg-new" style="color:#1b5e20;">年末本金</th>
+                        <th class="text-center">時間</th>
+                        <th class="bg-curr" style="color:#7b341e; text-align:right;">【方案 A：不轉按】<br>當期剩餘本金</th>
+                        <th class="bg-curr" style="color:#7b341e; text-align:right;">【方案 A：不轉按】<br>當期2年利息支出</th>
+                        <th class="bg-loop" style="color:#1b5e20; text-align:right;">【方案 B：無限轉按】<br>當期起步本金</th>
+                        <th class="bg-loop" style="color:#1b5e20; text-align:right;">【方案 B：無限轉按】<br>當期2年利息支出</th>
+                        <th class="text-center">當期新獲回贈</th>
+                        <th class="text-center">當期律師費</th>
+                        <th class="text-success" style="text-align:right;">當期淨利潤<br>(慳息+回贈-手續費)</th>
+                        <th style="text-align:right; background-color:#2c3e50;">累計總淨回報<br>(滾雪球戰果)</th>
                     </tr>
                 </thead>
-                <tbody id="comparisonTableBody">
+                <tbody id="loopTableBody">
                     </tbody>
             </table>
         </div>
@@ -258,136 +266,133 @@
 </div>
 
 <script>
-    function getAmortizationSchedule(principal, annualRate, totalYears) {
-        let monthlyRate = (annualRate / 100) / 12;
-        let totalMonths = totalYears * 12;
-        let pmt = (monthlyRate > 0) ? (principal * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1) : principal / totalMonths;
-
-        let schedule = [];
-        let currentBalance = principal;
-
-        for (let month = 1; month <= 360; month++) {
-            let interestPaid = 0;
-            let principalPaid = 0;
-            let currentPmt = 0;
-
-            if (month <= totalMonths && currentBalance > 0) {
-                currentPmt = pmt;
-                interestPaid = currentBalance * monthlyRate;
-                principalPaid = currentPmt - interestPaid;
-                currentBalance -= principalPaid;
-                if (currentBalance < 0) currentBalance = 0;
-            }
-
-            schedule.push({ month, pmt: currentPmt, interest: interestPaid, balance: currentBalance });
-        }
-        return schedule;
+    function getPmt(principal, annualRate, years) {
+        let r = (annualRate / 100) / 12;
+        let n = years * 12;
+        if (r === 0) return principal / n;
+        return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
     }
 
-    function generateTwoYearStrategy() {
-        let currLoan = parseFloat(document.getElementById('currLoan').value) || 0;
+    // 計算某個特定本金、利率、年期下，運行24個月的利息消耗及最終剩餘本金
+    function run24Months(principal, annualRate, years) {
+        let r = (annualRate / 100) / 12;
+        let pmt = getPmt(principal, annualRate, years);
+        let currentBalance = principal;
+        let totalInterest2Years = 0;
+
+        for (let m = 1; m <= 24; m++) {
+            if (currentBalance <= 0) break;
+            let interestPaid = currentBalance * r;
+            let principalPaid = pmt - interestPaid;
+            totalInterest2Years += interestPaid;
+            currentBalance -= principalPaid;
+        }
+        if (currentBalance < 0) currentBalance = 0;
+        return { interest: totalInterest2Years, endBalance: currentBalance };
+    }
+
+    function runUltimateLoopModel() {
+        let startLoan = parseFloat(document.getElementById('startLoan').value) || 0;
         let currRate = parseFloat(document.getElementById('currRate').value) || 0;
-        let currTenure = parseInt(document.getElementById('currTenure').value) || 0;
+        let startTenure = parseInt(document.getElementById('startTenure').value) || 0;
 
-        let newRate = parseFloat(document.getElementById('newRate').value) || 0;
-        let newTenure = parseInt(document.getElementById('newTenure').value) || 0;
-        let cashBackPct = parseFloat(document.getElementById('cashBack').value) || 0;
-        let legalFee = parseFloat(document.getElementById('legalFee').value) || 0;
+        let loopRate = parseFloat(document.getElementById('loopRate').value) || 0;
+        let loopTenureOpt = document.getElementById('loopTenure').value;
+        let loopCashBackPct = parseFloat(document.getElementById('loopCashBack').value) || 0;
+        let loopLegalFee = parseFloat(document.getElementById('loopLegalFee').value) || 0;
+        let cycleCount = parseInt(document.getElementById('cycleCount').value) || 1;
 
-        if (currLoan <= 0 || currTenure <= 0 || newTenure <= 0) {
-            alert('請填寫正確的數據。');
+        if (startLoan <= 0 || startTenure <= 0) {
+            alert('請填寫正確的基礎按揭數據。');
             return;
         }
 
-        // 更新標籤
-        for(let el of document.getElementsByClassName('lblCurrTen')) el.innerText = currTenure;
-        for(let el of document.getElementsByClassName('lblNewTen')) el.innerText = newTenure;
-
-        let currSched = getAmortizationSchedule(currLoan, currRate, currTenure);
-        let newSched = getAmortizationSchedule(currLoan, newRate, newTenure);
-
-        // 1. 先計算「關鍵首兩年（24個月）」的累計數值
-        let twoYearCurrIntSum = 0;
-        let twoYearNewIntSum = 0;
-        for(let m = 0; m < 24; m++) {
-            twoYearCurrIntSum += currSched[m].interest;
-            twoYearNewIntSum += newSched[m].interest;
-        }
-        let twoYearIntSavedAmount = twoYearCurrIntSum - twoYearNewIntSum;
-        let cashBackAmount = currLoan * (cashBackPct / 100);
-        let twoYearNetBenefit = twoYearIntSavedAmount + cashBackAmount - legalFee;
-
-        // 渲染兩年期精要數據
-        document.getElementById('twoYearCurrInt').innerText = '$' + Math.round(twoYearCurrIntSum).toLocaleString();
-        document.getElementById('twoYearNewInt').innerText = '$' + Math.round(twoYearNewIntSum).toLocaleString();
-        document.getElementById('twoYearIntSaved').innerText = '$' + Math.round(twoYearIntSavedAmount).toLocaleString();
-        document.getElementById('twoYearCashBack').innerText = '+$' + Math.round(cashBackAmount).toLocaleString();
-        document.getElementById('twoYearCost').innerText = '-$' + Math.round(legalFee).toLocaleString();
-
-        let strategyVerdict = document.getElementById('strategyVerdict');
-        if (twoYearNetBenefit > 0) {
-            strategyVerdict.className = "verdict good";
-            strategyVerdict.innerHTML = `🎉 兩年期戰術成功！這 2 年內你通過「降息 + 賺取回贈」，扣除律師費後純利潤高達 <strong>$${Math.round(twoYearNetBenefit).toLocaleString()}</strong>！兩年後罰息期一過，建議立即尋找下一個轉按機會！`;
-        } else {
-            strategyVerdict.className = "verdict bad";
-            strategyVerdict.innerHTML = `⚠️ 兩年短線不划算：首 2 年預計淨損耗 <strong>$${Math.round(Math.abs(twoYearNetBenefit)).toLocaleString()}</strong>。可能因為新舊利率太接近，或者現金回贈太低，不值得為此折騰律師費。`;
-        }
-
-        // 2. 渲染30年對比表並安插「兩年檢視線」
-        let tableBody = document.getElementById('comparisonTableBody');
+        let tableBody = document.getElementById('loopTableBody');
         tableBody.innerHTML = '';
+
+        let currentBalanceA = startLoan;
+        let currentBalanceB = startLoan;
+        
+        let cumCashBack = 0;
+        let cumLegalFee = 0;
         let cumInterestSaved = 0;
-        let maxDisplayYears = Math.max(currTenure, newTenure, 30);
+        let cumNetProfit = 0;
 
-        for (let year = 1; year <= maxDisplayYears; year++) {
-            let startMonth = (year - 1) * 12;
-            let currYearInt = 0, currYearPmt = 0, currEndBalance = 0;
-            let newYearInt = 0, newYearPmt = 0, newEndBalance = 0;
+        let tenureA = startTenure;
+        let tenureB = startTenure;
 
-            for (let m = 0; m < 12; m++) {
-                let idx = startMonth + m;
-                currYearInt += currSched[idx].interest;
-                currYearPmt = currSched[idx].pmt;
-                currEndBalance = currSched[idx].balance;
+        // 開始以 2 年為一個 Cycle 進行齒輪式精準滾動計算
+        for (let i = 1; i <= cycleCount; i++) {
+            let yearLabel = `第 ${(i-1)*2 + 1}-${i*2} 年`;
+            
+            // 方案 A（維持現狀）這兩年的狀況
+            let resA = run24Months(currentBalanceA, currRate, tenureA);
+            tenureA -= 2; // 舊方案年期自然扣減
+            if (tenureA < 0) tenureA = 0;
 
-                newYearInt += newSched[idx].interest;
-                newYearPmt = newSched[idx].pmt;
-                newEndBalance = newSched[idx].balance;
-            }
+            // 方案 B（無限轉按）這兩年的狀況
+            // 決定這一輪轉按要開展的年期
+            let currentTermB = (loopTenureOpt === '30') ? 30 : tenureB;
+            
+            let resB = run24Months(currentBalanceB, loopRate, currentTermB);
+            
+            // 計算這一次轉按所帶來的即時現金回贈（基於這一輪的起步本金計算）
+            let thisCashBack = currentBalanceB * (loopCashBackPct / 100);
+            let thisLegalFee = loopLegalFee;
+            let thisInterestSaved = resA.interest - resB.interest;
+            let thisNetProfit = thisInterestSaved + thisCashBack - thisLegalFee;
 
-            cumInterestSaved += (currYearInt - newYearInt);
-            let pmtDiff = currYearPmt - newYearPmt;
+            // 滾雪球累加
+            cumCashBack += thisCashBack;
+            cumLegalFee += thisLegalFee;
+            cumInterestSaved += thisInterestSaved;
+            cumNetProfit += thisNetProfit;
 
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="text-center" style="font-weight:bold;">第 ${year} 年</td>
-                <td class="bg-curr">${currYearPmt > 0 ? '$' + Math.round(currYearPmt).toLocaleString() : '$0'}</td>
-                <td class="bg-curr">$${Math.round(currYearInt).toLocaleString()}</td>
-                <td class="bg-curr">$${Math.round(currEndBalance).toLocaleString()}</td>
-                <td class="bg-new">${newYearPmt > 0 ? '$' + Math.round(newYearPmt).toLocaleString() : '$0'}</td>
-                <td class="bg-new">$${Math.round(newYearInt).toLocaleString()}</td>
-                <td class="bg-new">$${Math.round(newEndBalance).toLocaleString()}</td>
-                <td class="text-center ${pmtDiff > 0 ? 'text-success' : pmtDiff < 0 ? 'text-danger' : ''}">
-                    ${pmtDiff > 0 ? '少供 $' + Math.round(pmtDiff).toLocaleString() : pmtDiff < 0 ? '多供 $' + Math.round(Math.abs(pmtDiff)).toLocaleString() : '$0'}
-                </td>
-                <td class="text-center ${cumInterestSaved > 0 ? 'text-success' : 'text-danger'}">
-                    $${Math.round(cumInterestSaved).toLocaleString()}
+            // 建立轉按動作高亮行
+            let trAction = document.createElement('tr');
+            trAction.className = "highlight-cycle";
+            trAction.innerHTML = `
+                <td colspan="9" class="text-center" style="color: #2980b9; font-size:0.8rem; background-color:#e1f5fe;">
+                    🔄 【第 ${i} 次轉按執行】成功投奔新銀行 ── 賺取新一輪 ${loopCashBackPct}% 回贈，重設合約
                 </td>
             `;
-            tableBody.appendChild(tr);
+            tableBody.appendChild(trAction);
 
-            // 🌟 關鍵：在第二年結束後，插入一條轉按藍色虛線！
-            if (year === 2) {
-                let milestoneTr = document.createElement('tr');
-                milestoneTr.className = "milestone-row";
-                milestoneTr.innerHTML = `
-                    <td colspan="9" class="text-center">
-                        🔄 【第 2 年底：罰息期完結 ── 閣下在此時點可選擇再次轉按，重設遊戲，以下 3-30 年之數據將被新轉按打破】
-                    </td>
-                `;
-                tableBody.appendChild(milestoneTr);
+            // 建立數據對比行
+            let trData = document.createElement('tr');
+            trData.innerHTML = `
+                <td class="text-center" style="font-weight:bold;">${yearLabel}<br><span class="badge">Cycle ${i}</span></td>
+                <td class="bg-curr">$${Math.round(currentBalanceA).toLocaleString()}</td>
+                <td class="bg-curr">$${Math.round(resA.interest).toLocaleString()}</td>
+                <td class="bg-loop" style="font-weight:bold; color:#1b5e20;">$${Math.round(currentBalanceB).toLocaleString()}</td>
+                <td class="bg-loop">$${Math.round(resB.interest).toLocaleString()}</td>
+                <td class="text-center text-success">+$${Math.round(thisCashBack).toLocaleString()}</td>
+                <td class="text-center text-danger">-$${Math.round(thisLegalFee).toLocaleString()}</td>
+                <td class="text-right text-success" style="font-weight:600;">$${Math.round(thisNetProfit).toLocaleString()}</td>
+                <td class="text-right" style="font-weight:bold; color:#8e44ad; background-color:#fcf3cf;">$${Math.round(cumNetProfit).toLocaleString()}</td>
+            `;
+            tableBody.appendChild(trData);
+
+            // 【核心滾動機制】將這一期期末的剩餘本金，完美交接變成下一期的起步本金
+            currentBalanceA = resA.endBalance;
+            currentBalanceB = resB.endBalance;
+            
+            // 如果方案B選擇不拉長，年期就自然跟隨扣減
+            if (loopTenureOpt !== '30') {
+                tenureB -= 2;
+                if (tenureB < 0) tenureB = 0;
             }
         }
+
+        // 渲染總覽區
+        document.getElementById('summaryYears').innerText = cycleCount * 2;
+        document.getElementById('summaryCycles').innerText = cycleCount;
+        document.getElementById('totalCashBackEarned').innerText = '$' + Math.round(cumCashBack).toLocaleString();
+        document.getElementById('totalLegalFeeCost').innerText = '-$' + Math.round(cumLegalFee).toLocaleString();
+        document.getElementById('totalInterestSaved').innerText = '+$' + Math.round(cumInterestSaved).toLocaleString();
+
+        let verdictBox = document.getElementById('ultimateVerdict');
+        verdictBox.innerHTML = `🚀 滾雪球戰略成果：未來 ${cycleCount * 2} 年透過「每兩年一轉按」，你預計可以比完全不轉按，**額外幫自己創造 $${Math.round(cumNetProfit).toLocaleString()} 嘅實質淨財富**！`;
 
         document.getElementById('resultArea').style.display = 'block';
         document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
