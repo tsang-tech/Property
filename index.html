@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>物業轉按終極戰術計算機 v4.1 - 超長線無限循環流</title>
+    <title>物業轉按終極戰術計算機 v4.2 - 回贈扣本極速流</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -13,6 +13,7 @@
             --bg-color: #f4f6f8;
             --card-bg: #ffffff;
             --text-color: #333;
+            --accent-color: #d35400;
         }
 
         body {
@@ -132,7 +133,7 @@
         .table-responsive {
             overflow-x: auto;
             margin-top: 15px;
-            max-height: 600px; /* 超長表格增加滾動條方便查閱 */
+            max-height: 600px;
             border: 1px solid #e2e8f0;
         }
 
@@ -156,6 +157,7 @@
 
         tr:nth-child(even) { background-color: #f8fafc; }
         tr.highlight-cycle { background-color: #e1f5fe; font-weight: bold; }
+        tr.highlight-reinvest { background-color: #fcf3cf; font-weight: bold; }
         td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
         
         .text-center { text-align: center; }
@@ -172,13 +174,16 @@
             border-radius: 4px;
             font-size: 0.75rem;
         }
+        .badge-reinvest {
+            background-color: var(--accent-color);
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏠 物業轉按終極戰術計算機 v4.1</h1>
-    <div class="subtitle">🔄 模擬「每兩年無限循環轉按」滾雪球套利模型（增強長線版）</div>
+    <h1>🏠 物業轉按終極戰術計算機 v4.2</h1>
+    <div class="subtitle">🔄 模擬「無限循環轉按」＋「回贈扣減本金」複合雪球模型</div>
     
     <div class="grid">
         <div class="card">
@@ -197,7 +202,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" style="border-top: 4px solid var(--accent-color);">
             <h2>2. 未來「每2年無限轉按」參數設定</h2>
             <div class="form-group">
                 <label for="loopRate">預估未來新按揭平均年利率 (%)</label>
@@ -214,18 +219,22 @@
                 <label for="loopCashBack">預估未來平均每次現金回贈 (%)</label>
                 <input type="number" id="loopCashBack" value="1.0" step="0.01">
             </div>
+            <div class="form-group" style="background-color: #fdf2e9; padding: 10px; border-radius: 5px; border: 1px solid #f5cba7;">
+                <label for="rebateAction" style="color: #d35400; font-weight: bold;">💰 每次賺到的現金回贈點處理？</label>
+                <select id="rebateAction">
+                    <option value="keep">現金落袋 (保留作流動資金，按揭本金正常過檔)</option>
+                    <option value="reinvest" selected>🔥 全數扣減本金 (下次轉按時，用上期回贈扣減新按揭本金)</option>
+                </select>
+            </div>
             <div class="form-group">
                 <label for="loopLegalFee">預估平均每次轉按律師費 ($)</label>
                 <input type="number" id="loopLegalFee" value="6000">
             </div>
             <div class="form-group">
-                <label for="cycleCount">你想模擬未來連續循環轉按幾多次？ (每2年為一次)</label>
+                <label for="cycleCount">你想模擬未來連續循環轉按幾多次？</label>
                 <select id="cycleCount">
-                    <option value="1">轉 1 次 (睇 2 年效果)</option>
-                    <option value="2">連續轉 2 次 (睇 4 年效果)</option>
-                    <option value="3" selected>連續轉 3 次 (睇 6 年效果)</option>
-                    <option value="4">連續轉 4 次 (睇 8 年效果)</option>
-                    <option value="5">連續轉 5 次 (睇 10 年效果)</option>
+                    <option value="3">連續轉 3 次 (睇 6 年效果)</option>
+                    <option value="5" selected>連續轉 5 次 (睇 10 年效果)</option>
                     <option value="10">🔥 連續轉 10 次 (大長線：睇 20 年爆發力)</option>
                     <option value="15">🪐 連續轉 15 次 (終極戰：睇 30 年跨世代戰果)</option>
                 </select>
@@ -240,15 +249,14 @@
             <h2>📊 【無限轉按流】vs【不轉按流】階段總結</h2>
             <p>在未來的 <span id="summaryYears" style="font-weight:bold; color:#8e44ad;">0</span> 年內，如果你堅持實施「每兩年一轉」戰術，你將會經歷 <span id="summaryCycles" style="font-weight:bold; color:#8e44ad;">0</span> 次轉按：</p>
             <ul>
-                <li>期間累計自動穩袋的<b>現金回贈總額</b>：<span id="totalCashBackEarned" class="text-success" style="font-weight:bold;">$0</span></li>
+                <li>期間累計獲取的<b>現金回贈總額</b>：<span id="totalCashBackEarned" class="text-success" style="font-weight:bold;">$0</span> <span id="rebateNote" style="font-size:0.85rem; color:#666;"></span></li>
                 <li>期間累計付出的<b>總律師費成本</b>：<span id="totalLegalFeeCost" class="text-danger">-$0</span></li>
-                <li>期間因為利率較低，累計<b>幫你慳到的利息</b>：<span id="totalInterestSaved" class="text-success">+$0</span></li>
+                <li>期間因為利率較低<span id="interestNote"></span>，累計<b>幫你慳到的利息</b>：<span id="totalInterestSaved" class="text-success" style="font-weight:bold;">+$0</span></li>
             </ul>
             <div id="ultimateVerdict" class="verdict good"></div>
         </div>
 
         <h2>📅 滾雪球實戰全期對比明細表</h2>
-        <p style="font-size:0.85rem; color:#666;">* 下表為你精準模擬每兩年「重設遊戲」時的真實本金變化。藍色橫條代表<b>轉按執行點</b>。若起點設定年期較短，中後期本金歸零後會自動停止運算，確保數據絕對真實。</p>
         
         <div class="table-responsive">
             <table>
@@ -261,7 +269,7 @@
                         <th class="bg-loop" style="color:#1b5e20; text-align:right;">【方案 B：無限轉按】<br>當期2年利息支出</th>
                         <th class="text-center">當期新獲回贈</th>
                         <th class="text-center">當期律師費</th>
-                        <th class="text-success" style="text-align:right;">當期淨利潤<br>(慳息+回贈-手續費)</th>
+                        <th class="text-success" style="text-align:right;">當期淨財富增長<br>(慳息+回贈-手續費)</th>
                         <th style="text-align:right; background-color:#2c3e50; color:white;">累計總淨回報<br>(滾雪球戰果)</th>
                     </tr>
                 </thead>
@@ -282,7 +290,6 @@
     }
 
     function run24Months(principal, annualRate, years) {
-        // 安全防線：如果年期或本金已經歸零，直接回傳零
         if (years <= 0 || principal <= 0) {
             return { interest: 0, endBalance: 0 };
         }
@@ -300,7 +307,6 @@
             let interestPaid = currentBalance * r;
             let principalPaid = pmt - interestPaid;
             
-            // 如果最後供款額大過剩餘本金，進行修正
             if (principalPaid > currentBalance) {
                 principalPaid = currentBalance;
             }
@@ -320,6 +326,7 @@
         let loopRate = parseFloat(document.getElementById('loopRate').value) || 0;
         let loopTenureOpt = document.getElementById('loopTenure').value;
         let loopCashBackPct = parseFloat(document.getElementById('loopCashBack').value) || 0;
+        let rebateAction = document.getElementById('rebateAction').value;
         let loopLegalFee = parseFloat(document.getElementById('loopLegalFee').value) || 0;
         let cycleCount = parseInt(document.getElementById('cycleCount').value) || 1;
 
@@ -341,6 +348,8 @@
 
         let tenureA = startTenure;
         let tenureB = startTenure;
+        
+        let prevCashBack = 0; // 用作儲存上一期嘅回贈
 
         for (let i = 1; i <= cycleCount; i++) {
             let yearLabel = `第 ${(i-1)*2 + 1}-${i*2} 年`;
@@ -350,14 +359,28 @@
             tenureA -= 2;
             if (tenureA < 0) tenureA = 0;
 
-            // 執行方案 B (無限轉按)
+            // 【核心邏輯】：如果選擇咗「回贈扣本」，喺第2次轉按起，將上期回贈扣減新按揭本金
+            let injectedMsg = "";
+            let actionClass = "highlight-cycle";
+            if (rebateAction === 'reinvest' && i > 1 && currentBalanceB > 0 && prevCashBack > 0) {
+                currentBalanceB -= prevCashBack;
+                if (currentBalanceB < 0) currentBalanceB = 0;
+                injectedMsg = ` 💥 注入上期回贈 $${Math.round(prevCashBack).toLocaleString()} 扣減本金！`;
+                actionClass = "highlight-reinvest";
+            }
+
             let currentTermB = (loopTenureOpt === '30') ? 30 : tenureB;
-            let resB = run24Months(currentBalanceB, loopRate, currentTermB);
             
-            // 計算當期回贈 (若本金已扣到 0 就不再有回贈與律師費)
+            // 計算當期回贈
             let thisCashBack = currentBalanceB > 0 ? currentBalanceB * (loopCashBackPct / 100) : 0;
             let thisLegalFee = currentBalanceB > 0 ? loopLegalFee : 0;
+            
+            // 執行方案 B (無限轉按)
+            let resB = run24Months(currentBalanceB, loopRate, currentTermB);
+            
             let thisInterestSaved = resA.interest - resB.interest;
+            
+            // 淨財富增長計算：即使回贈扣減咗本金，呢筆錢依然係你嘅真實資產增長
             let thisNetProfit = thisInterestSaved + thisCashBack - thisLegalFee;
 
             cumCashBack += thisCashBack;
@@ -365,13 +388,14 @@
             cumInterestSaved += thisInterestSaved;
             cumNetProfit += thisNetProfit;
 
-            // 只有在本金還大於 0 時才顯示轉按動作條
-            if (currentBalanceB > 0) {
+            // 輸出 Action 行
+            if (currentBalanceB > 0 || (currentBalanceB === 0 && prevCashBack > 0 && rebateAction === 'reinvest')) {
                 let trAction = document.createElement('tr');
-                trAction.className = "highlight-cycle";
+                trAction.className = actionClass;
+                let textCol = rebateAction === 'reinvest' && i > 1 ? '#d35400' : '#2980b9';
                 trAction.innerHTML = `
-                    <td colspan="9" class="text-center" style="color: #2980b9; font-size:0.8rem;">
-                        🔄 【第 ${i} 次轉按執行】按揭本金 $${Math.round(currentBalanceB).toLocaleString()} 順利過檔 ── 穩賺 $${Math.round(thisCashBack).toLocaleString()} 現金回贈
+                    <td colspan="9" class="text-center" style="color: ${textCol}; font-size:0.85rem;">
+                        🔄 【第 ${i} 次轉按執行】${injectedMsg}新按揭本金 $${Math.round(currentBalanceB).toLocaleString()} 過檔 ── 賺取本期新回贈 $${Math.round(thisCashBack).toLocaleString()}
                     </td>
                 `;
                 tableBody.appendChild(trAction);
@@ -379,7 +403,7 @@
 
             let trData = document.createElement('tr');
             trData.innerHTML = `
-                <td class="text-center" style="font-weight:bold;">${yearLabel}<br><span class="badge">Cycle ${i}</span></td>
+                <td class="text-center" style="font-weight:bold;">${yearLabel}<br><span class="badge ${rebateAction === 'reinvest' && i > 1 ? 'badge-reinvest' : ''}">Cycle ${i}</span></td>
                 <td class="bg-curr">$${Math.round(currentBalanceA).toLocaleString()}</td>
                 <td class="bg-curr">$${Math.round(resA.interest).toLocaleString()}</td>
                 <td class="bg-loop" style="font-weight:bold; color:#1b5e20;">$${Math.round(currentBalanceB).toLocaleString()}</td>
@@ -394,6 +418,9 @@
             currentBalanceA = resA.endBalance;
             currentBalanceB = resB.endBalance;
             
+            // 儲存今期回贈，留畀下期用
+            prevCashBack = thisCashBack;
+            
             if (loopTenureOpt !== '30') {
                 tenureB -= 2;
                 if (tenureB < 0) tenureB = 0;
@@ -405,6 +432,14 @@
         document.getElementById('totalCashBackEarned').innerText = '$' + Math.round(cumCashBack).toLocaleString();
         document.getElementById('totalLegalFeeCost').innerText = '-$' + Math.round(cumLegalFee).toLocaleString();
         document.getElementById('totalInterestSaved').innerText = '+$' + Math.round(cumInterestSaved).toLocaleString();
+
+        if(rebateAction === 'reinvest') {
+            document.getElementById('rebateNote').innerText = "(已全數自動轉化為本金扣減)";
+            document.getElementById('interestNote').innerText = "及本金加速減少";
+        } else {
+            document.getElementById('rebateNote').innerText = "(全數現金落袋)";
+            document.getElementById('interestNote').innerText = "";
+        }
 
         let verdictBox = document.getElementById('ultimateVerdict');
         verdictBox.innerHTML = `🚀 滾雪球戰略成果：未來 ${cycleCount * 2} 年透過「每兩年一轉按」，你預計可以比完全不轉按，**額外幫自己創造 $${Math.round(cumNetProfit).toLocaleString()} 嘅實質淨財富**！`;
