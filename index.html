@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港房產終極策略決戰計算機 v5.0</title>
+    <title>香港房產終極策略決戰計算機 v5.1</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -69,8 +69,6 @@
             border-bottom: 2px solid #edf2f7;
             padding-bottom: 8px;
             font-size: 1.05rem;
-            display: flex;
-            justify-content: space-between;
         }
 
         .form-group {
@@ -97,7 +95,7 @@
 
         button {
             width: 100%;
-            background-color: #2c3e50;
+            background-color: #e74c3c;
             color: white;
             border: none;
             padding: 15px;
@@ -109,7 +107,7 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        button:hover { background-color: #1a252f; }
+        button:hover { background-color: #c0392b; }
 
         .battle-box {
             background-color: #fff;
@@ -127,7 +125,6 @@
             color: var(--primary-color);
         }
 
-        /* 排名卡片 */
         .rank-container {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -173,19 +170,22 @@
         td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
         
         .text-center { text-align: center; }
-        .text-danger { color: var(--danger-color); font-weight: 600; }
-        .text-success { color: var(--success-color); font-weight: 600; }
-        
         .tab-rent { background-color: #fef9e7; }
         .tab-own { background-color: #f4fdf7; }
         .tab-rentrent { background-color: #eaf2f8; }
+        
+        .note {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏠 香港房產終極策略決戰計算機 v5.0</h1>
-    <div class="subtitle">⚔️ 純租樓 vs 買樓自住 vs 租租策略（買樓出租＋租樓自住）大決戰</div>
+    <h1>🏠 香港房產終極策略決戰計算機 v5.1</h1>
+    <div class="subtitle">⚔️ 【精準流水賬修正版】純租樓 vs 買樓自住 vs 租租策略大決戰</div>
     
     <div class="grid-3">
         <div class="card" style="border-top: 4px solid var(--warning-color);">
@@ -199,31 +199,31 @@
                 <input type="number" id="propGrowth" value="2.0" step="0.1">
             </div>
             <div class="form-group">
-                <label>手頭總可用首期/首置資金 ($)</label>
+                <label>手頭總可用起步資金/首期 ($)</label>
                 <input type="number" id="startCapital" value="2000000">
             </div>
             <div class="form-group">
-                <label>非物業投資年回報 (如美股/定期) (%)</label>
+                <label>非物業投資年回報 (如美股/大盤) (%)</label>
                 <input type="number" id="stockGrowth" value="5.0" step="0.1">
             </div>
             <div class="form-group">
                 <label>模擬對比年期 (年)</label>
                 <select id="compareYears">
-                    <option value="6" selected>6 年 (中短期對比)</option>
-                    <option value="10">10 年 (中長期趨勢)</option>
+                    <option value="6">6 年 (中短期對比)</option>
+                    <option value="10" selected>10 年 (中長期趨勢)</option>
                     <option value="20">20 年 (長期全面大決戰)</option>
                 </select>
             </div>
         </div>
 
         <div class="card" style="border-top: 4px solid var(--success-color);">
-            <h2>🏦 按揭與房屋持有成本 (自住/出租通用)</h2>
+            <h2>🏦 按揭與房屋持有成本 (方案B/C通用)</h2>
             <div class="form-group">
                 <label>按揭貸款成數 (%)</label>
                 <input type="number" id="loanPct" value="70">
             </div>
             <div class="form-group">
-                <label>按揭年利率 (%) *可配合兩年一轉按</label>
+                <label>按揭年利率 (%)</label>
                 <input type="number" id="mortRate" value="3.625" step="0.001">
             </div>
             <div class="form-group">
@@ -243,15 +243,15 @@
         <div class="card" style="border-top: 4px solid var(--secondary-color);">
             <h2>🔑 租務市場開支設定</h2>
             <div class="form-group">
-                <label>若【純租樓/租租】自住每月租金 ($)</label>
+                <label>自住租樓每月租金 ($) *方案A/C適用</label>
                 <input type="number" id="rentOut" value="18000">
             </div>
             <div class="form-group">
-                <label>若【租租策略】自身物業出租月租金 ($)</label>
+                <label>自身物業出租月租金 ($) *方案C適用</label>
                 <input type="number" id="rentIn" value="17000">
             </div>
             <div class="form-group">
-                <label>物業出租成本 (15%物業稅 + 0.5個月佣金/年) ($/月)</label>
+                <label>出租雜費 (物業稅15% + 租務維修開支) ($/月)</label>
                 <input type="number" id="taxRentCost" value="2800">
             </div>
             <div class="form-group">
@@ -261,42 +261,45 @@
         </div>
     </div>
 
-    <button onclick="clashOfStrategies()">⚔️ 啟動三大策略終極財富沙盤推演</button>
+    <button onclick="clashOfStrategiesUpdated()">⚔️ 啟動精準流水賬沙盤推演</button>
 
     <div id="resultArea" style="display:none;">
         <div class="battle-box">
-            <div class="verdict-title">🏆 最終模擬期滿「身家淨資產」總結排名</div>
+            <div class="verdict-title">🏆 期滿「身家淨資產」最終排名結算</div>
             <div class="rank-container">
                 <div class="rank-card rank-1" id="rank1Box">第一名</div>
                 <div class="rank-card rank-2" id="rank2Box">第二名</div>
                 <div class="rank-card rank-3" id="rank3Box">第三名</div>
             </div>
-            <p style="font-size:0.85rem; margin-top:15px; color:#555; text-align:center;">
-                * <b>身家淨資產</b> 計算公式 = (期末物業價值 - 剩餘按揭貸款) + 期末外圍投資庫存現金 - 期間非資本化開支。數字越高代表該策略幫你滾出的財富越多。
+            <p class="note" style="text-align:center;">
+                * <b>身家淨資產綜合計算公式：</b><br>
+                方案 A = 期末剩餘股票庫存現金額。<br>
+                方案 B & C = (期末物業估值 - 剩餘按揭貸款) + 期末剩餘股票庫存現金額。<br>
+                (註：若月供/租金大於投資回報，庫存現金額會變成負數，代表需要由工作薪金補貼，此時會精確扣減總身家。)
             </p>
         </div>
 
-        <h2>📅 三大策略每兩年遞進財富對比表</h2>
+        <h2>📅 三大策略每兩年遞進流水賬明細表</h2>
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
                         <th rowspan="2">時間</th>
-                        <th colspan="3" class="tab-rent" style="color:#7d6608;">方案 A：純租樓自住（資金投向股市）</th>
-                        <th colspan="3" class="tab-own" style="color:#196f3d;">方案 B：買樓自住（自置物業）</th>
-                        <th colspan="3" class="tab-rentrent" style="color:#1b4f72;">方案 C：港式租租（物業出租＋自己租樓）</th>
+                        <th colspan="3" class="tab-rent" style="color:#7d6608;">方案 A：純租樓自住 (租金直接消耗資金池)</th>
+                        <th colspan="3" class="tab-own" style="color:#196f3d;">方案 B：買樓自住 (供樓及雜費消耗資金池)</th>
+                        <th colspan="3" class="tab-rentrent" style="color:#1b4f72;">方案 C：港式租租 (收租/付租/供樓綜合混合流)</th>
                     </tr>
                     <tr>
                         <th class="tab-rent">累計付租</th>
-                        <th class="tab-rent">股票資產</th>
+                        <th class="tab-rent">剩餘外圍資金</th>
                         <th class="tab-rent" style="font-weight:bold; color:#7d6608;">身家淨資產</th>
                         
                         <th class="tab-own">剩餘按揭</th>
-                        <th class="tab-own">物業估值</th>
+                        <th class="tab-own">剩餘外圍資金</th>
                         <th class="tab-own" style="font-weight:bold; color:#196f3d;">身家淨資產</th>
                         
-                        <th class="tab-rentrent">累計淨租差</th>
-                        <th class="tab-rentrent">物業估值</th>
+                        <th class="tab-rentrent">累計收支淨缺口</th>
+                        <th class="tab-rentrent">剩餘外圍資金</th>
                         <th class="tab-rentrent" style="font-weight:bold; color:#1b4f72;">身家淨資產</th>
                     </tr>
                 </thead>
@@ -314,136 +317,130 @@
         return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
     }
 
-    function clashOfStrategies() {
-        // 基礎假設
+    function clashOfStrategiesUpdated() {
+        // 讀取輸入
         let propValue = parseFloat(document.getElementById('propValue').value) || 0;
         let propGrowth = (parseFloat(document.getElementById('propGrowth').value) || 0) / 100;
         let startCapital = parseFloat(document.getElementById('startCapital').value) || 0;
         let stockGrowth = (parseFloat(document.getElementById('stockGrowth').value) || 0) / 100;
-        let compareYears = parseInt(document.getElementById('compareYears').value) || 6;
+        let compareYears = parseInt(document.getElementById('compareYears').value) || 10;
 
-        // 按揭相關
         let loanPct = (parseFloat(document.getElementById('loanPct').value) || 0) / 100;
         let mortRate = parseFloat(document.getElementById('mortRate').value) || 0;
         let mortTerm = parseInt(document.getElementById('mortTerm').value) || 0;
         let maintCost = parseFloat(document.getElementById('maintCost').value) || 0;
         let buyTxCost = parseFloat(document.getElementById('buyTxCost').value) || 0;
 
-        // 租務相關
-        let rentOut = parseFloat(document.getElementById('rentOut').value) || 0; // 自己去租
-        let rentIn = parseFloat(document.getElementById('rentIn').value) || 0;   // 買樓出租人
+        let rentOut = parseFloat(document.getElementById('rentOut').value) || 0; 
+        let rentIn = parseFloat(document.getElementById('rentIn').value) || 0;   
         let taxRentCost = parseFloat(document.getElementById('taxRentCost').value) || 0;
         let rentGrowth = (parseFloat(document.getElementById('rentGrowth').value) || 0) / 100;
 
         let tableBody = document.getElementById('battleTableBody');
         tableBody.innerHTML = '';
 
-        // --- 初始化三大方案變數 ---
-        
-        // 方案 A：純租樓
-        let rentA_currentRent = rentOut;
-        let rentA_stockBalance = startCapital; // 所有錢直接掉入股市/投資
-        let rentA_totalRentPaid = 0;
+        // --- 核心變數初始化 (Time 0) ---
+        let initialLoan = propValue * loanPct;
+        let fixed_pmt = getPmt(initialLoan, mortRate, mortTerm);
 
-        // 方案 B：買樓自住
-        let ownB_propValue = propValue;
-        let ownB_loanAmount = propValue * loanPct;
-        let ownB_pmt = getPmt(ownB_loanAmount, mortRate, mortTerm);
-        // 買樓後剩餘資金放股市
-        let ownB_stockBalance = startCapital - (propValue * (1 - loanPct)) - buyTxCost; 
-        if (ownB_stockBalance < 0) ownB_stockBalance = 0; 
+        // A 方案：起步全投股市
+        let A_wealth = startCapital;
+        let A_cumRentPaid = 0;
+        let A_currentRent = rentOut;
 
-        // 方案 C：租租策略
-        let rrC_propValue = propValue;
-        let rrC_loanAmount = propValue * loanPct;
-        let rrC_pmt = getPmt(rrC_loanAmount, mortRate, mortTerm);
-        let rrC_stockBalance = startCapital - (propValue * (1 - loanPct)) - buyTxCost;
-        if (rrC_stockBalance < 0) rrC_stockBalance = 0;
-        let rrC_currentRentIn = rentIn;   // 收租
-        let rrC_currentRentOut = rentOut; // 付租
-        let rrC_cumRentGapExpense = 0;
+        // B 方案：扣除首期及交易費，物業權益起步
+        let B_wealth = startCapital - (propValue * (1 - loanPct)) - buyTxCost; 
+        let B_loan = initialLoan;
+        let B_prop = propValue;
 
-        // 每兩年步進計算
-        for (let year = 2; year <= compareYears; year += 2) {
+        // C 方案：租租
+        let C_wealth = startCapital - (propValue * (1 - loanPct)) - buyTxCost;
+        let C_loan = initialLoan;
+        let C_prop = propValue;
+        let C_currentRentIn = rentIn;
+        let C_currentRentOut = rentOut;
+        let C_cumGapExpense = 0;
+
+        let totalMonths = compareYears * 12;
+        let r_idx = (mortRate / 100) / 12;
+
+        // --- 按月精準沙盤推演 ---
+        for (let m = 1; m <= totalMonths; m++) {
             
-            // -------- 方案 A 演進 (2年) --------
-            for(let m=0; m<24; m++) {
-                rentA_totalRentPaid += rentA_currentRent;
-                // 每月付完租金後，剩餘的股票大盤滾動
-                rentA_stockBalance = rentA_stockBalance * (1 + stockGrowth/12);
+            // 租金每兩年（24個月）跳升一次
+            if (m > 1 && (m - 1) % 24 === 0) {
+                A_currentRent *= (1 + rentGrowth * 2);
+                C_currentRentIn *= (1 + rentGrowth * 2);
+                C_currentRentOut *= (1 + rentGrowth * 2);
             }
-            let netAssetA = rentA_stockBalance; // 純租樓身家就是股票價值
-            rentA_currentRent *= (1 + rentGrowth * 2); // 每兩年續租續加
 
-            // -------- 方案 B 演進 (2年) --------
-            let r_idx = (mortRate/100)/12;
-            let b_interest_2years = 0;
-            for(let m=0; m<24; m++) {
-                let intr = ownB_loanAmount * r_idx;
-                let prin = ownB_pmt - intr;
-                b_interest_2years += intr;
-                ownB_loanAmount -= prin;
-                ownB_stockBalance = ownB_stockBalance * (1 + stockGrowth/12);
-            }
-            ownB_propValue *= Math.pow(1 + propGrowth, 2); // 樓價升值
-            let netAssetB = (ownB_propValue - ownB_loanAmount) + ownB_stockBalance - (maintCost * 24);
+            // 物業按月複利增值
+            B_prop *= (1 + propGrowth / 12);
+            C_prop *= (1 + propGrowth / 12);
 
-            // -------- 方案 C 演進 (2年) --------
-            let c_interest_2years = 0;
-            for(let m=0; m<24; m++) {
-                let intr = rrC_loanAmount * r_idx;
-                let prin = rrC_pmt - intr;
-                c_interest_2years += intr;
-                rrC_loanAmount -= prin;
-                
-                // 租租每月的淨現金流缺口 = 自身供樓 + 管理費 + 自己付租 + 出租稅務開支 - 收取別人的租金
-                let monthlyGap = rrC_pmt + maintCost + rrC_currentRentOut + taxRentCost - rrC_currentRentIn;
-                rrC_cumRentGapExpense += monthlyGap;
-                
-                rrC_stockBalance = rrC_stockBalance * (1 + stockGrowth/12);
-            }
-            rrC_propValue *= Math.pow(1 + propGrowth, 2);
-            // 租租策略身家 = 物業權益 + 股票存量 - 累計租金與供樓產生的淨現金流消耗
-            let netAssetC = (rrC_propValue - rrC_loanAmount) + rrC_stockBalance - rrC_cumRentGapExpense;
+            // 【方案 A 運算】
+            A_wealth = A_wealth * (1 + stockGrowth / 12); // 先計股票增值
+            A_wealth -= A_currentRent;                     // 真正扣除每月租金開支！
+            A_cumRentPaid += A_currentRent;
+
+            // 【方案 B 運算】
+            B_wealth = B_wealth * (1 + stockGrowth / 12); // 剩餘資金滾大盤
+            let b_interest = B_loan * r_idx;
+            let b_principal = fixed_pmt - b_interest;
+            B_loan -= b_principal;                        // 扣減按揭本金
+            B_wealth -= (fixed_pmt + maintCost);          // 資金池扣除每月真實供款及管理費
+
+            // 【方案 C 運算】
+            C_wealth = C_wealth * (1 + stockGrowth / 12);
+            let c_interest = C_loan * r_idx;
+            let c_principal = fixed_pmt - c_interest;
+            C_loan -= c_principal;
             
-            // 租金兩年一變
-            rrC_currentRentIn *= (1 + rentGrowth * 2);
-            rrC_currentRentOut *= (1 + rentGrowth * 2);
+            // 租租綜合每月現金流缺口 = 供樓 + 管理費 + 自己付租 + 出租成本 - 收取租金
+            let c_monthly_gap = fixed_pmt + maintCost + C_currentRentOut + taxRentCost - C_currentRentIn;
+            C_wealth -= c_monthly_gap;                    // 缺口直接扣減/注入外圍資金池
+            C_cumGapExpense += c_monthly_gap;
 
-            // -------- 渲染表格行 --------
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="text-center" style="font-weight:bold;">第 ${year} 年完結</td>
-                <td class="tab-rent">$${Math.round(rentA_totalRentPaid).toLocaleString()}</td>
-                <td class="tab-rent">$${Math.round(rentA_stockBalance).toLocaleString()}</td>
-                <td class="tab-rent" style="font-weight:bold; color:#7d6608;">$${Math.round(netAssetA).toLocaleString()}</td>
-                <td class="tab-own">$${Math.round(ownB_loanAmount).toLocaleString()}</td>
-                <td class="tab-own">$${Math.round(ownB_propValue).toLocaleString()}</td>
-                <td class="tab-own" style="font-weight:bold; color:#196f3d;">$${Math.round(netAssetB).toLocaleString()}</td>
-                <td class="tab-rentrent">$${Math.round(rrC_cumRentGapExpense).toLocaleString()}</td>
-                <td class="tab-rentrent">$${Math.round(rrC_propValue).toLocaleString()}</td>
-                <td class="tab-rentrent" style="font-weight:bold; color:#1b4f72;">$${Math.round(netAssetC).toLocaleString()}</td>
-            `;
-            tableBody.appendChild(tr);
+            // 每 2 年（24個月）向表格輸出一次對比
+            if (m % 24 === 0) {
+                let currentYear = m / 12;
+                
+                let netAssetA = A_wealth;
+                let netAssetB = (B_prop - B_loan) + B_wealth;
+                let netAssetC = (C_prop - C_loan) + C_wealth;
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-center" style="font-weight:bold;">第 ${currentYear} 年完結</td>
+                    <td class="tab-rent">$${Math.round(A_cumRentPaid).toLocaleString()}</td>
+                    <td class="tab-rent" style="color: ${A_wealth < 0 ? 'red' : 'inherit'}">$${Math.round(A_wealth).toLocaleString()}</td>
+                    <td class="tab-rent" style="font-weight:bold; color:#7d6608;">$${Math.round(netAssetA).toLocaleString()}</td>
+                    <td class="tab-own">$${Math.round(B_loan).toLocaleString()}</td>
+                    <td class="tab-own" style="color: ${B_wealth < 0 ? 'red' : 'inherit'}">$${Math.round(B_wealth).toLocaleString()}</td>
+                    <td class="tab-own" style="font-weight:bold; color:#196f3d;">$${Math.round(netAssetB).toLocaleString()}</td>
+                    <td class="tab-rentrent">$${Math.round(C_cumGapExpense).toLocaleString()}</td>
+                    <td class="tab-rentrent" style="color: ${C_wealth < 0 ? 'red' : 'inherit'}">$${Math.round(C_wealth).toLocaleString()}</td>
+                    <td class="tab-rentrent" style="font-weight:bold; color:#1b4f72;">$${Math.round(netAssetC).toLocaleString()}</td>
+                `;
+                tableBody.appendChild(tr);
+            }
         }
 
-        // --- 最終年期期末結算排名 ---
-        let finalA = rentA_stockBalance;
-        let finalB = (ownB_propValue - ownB_loanAmount) + ownB_stockBalance - (maintCost * compareYears * 12);
-        let finalC = (rrC_propValue - rrC_loanAmount) + rrC_stockBalance - rrC_cumRentGapExpense;
+        // --- 期末結算與最終排名 ---
+        let finalNetA = A_wealth;
+        let finalNetB = (B_prop - B_loan) + B_wealth;
+        let finalNetC = (C_prop - C_loan) + C_wealth;
 
         let results = [
-            { name: "👑 方案 A：純租樓流 (資金全投外圍)", value: finalA },
-            { name: "🏠 方案 B：買樓自住流 (鎖定樓市升幅)", value: finalB },
-            { name: "🔄 方案 C：港式租租流 (兩邊開弓套利)", value: finalC }
+            { name: "👑 方案 A：純租樓自住流", value: finalNetA },
+            { name: "🏠 方案 B：買樓自住流", value: finalNetB },
+            { name: "🔄 方案 C：港式租租策略流", value: finalNetC }
         ];
-
-        // 排序
         results.sort((a, b) => b.value - a.value);
 
-        document.getElementById('rank1Box').innerHTML = `🥇 第一名<br>${results[0].name}<br>身家: $${Math.round(results[0].value).toLocaleString()}`;
-        document.getElementById('rank2Box').innerHTML = `🥈 第二名<br>${results[1].name}<br>身家: $${Math.round(results[1].value).toLocaleString()}`;
-        document.getElementById('rank3Box').innerHTML = `🥉 第三名<br>${results[2].name}<br>身家: $${Math.round(results[2].value).toLocaleString()}`;
+        document.getElementById('rank1Box').innerHTML = `🥇 第一名<br>${results[0].name}<br>終極身家: $${Math.round(results[0].value).toLocaleString()}`;
+        document.getElementById('rank2Box').innerHTML = `🥈 第二名<br>${results[1].name}<br>終極身家: $${Math.round(results[1].value).toLocaleString()}`;
+        document.getElementById('rank3Box').innerHTML = `🥉 第三名<br>${results[2].name}<br>終極身家: $${Math.round(results[2].value).toLocaleString()}`;
 
         document.getElementById('resultArea').style.display = 'block';
         document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
