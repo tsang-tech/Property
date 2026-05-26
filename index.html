@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>物業轉按終極戰術計算機 v4.0 - 無限循環流</title>
+    <title>香港房產終極策略決戰計算機 v5.0</title>
     <style>
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #2980b9;
             --success-color: #27ae60;
             --danger-color: #c0392b;
+            --warning-color: #f39c12;
             --bg-color: #f4f6f8;
             --card-bg: #ffffff;
             --text-color: #333;
@@ -25,7 +26,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
         }
 
@@ -44,22 +45,22 @@
             font-weight: bold;
         }
 
-        .grid {
+        .grid-3 {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        @media (max-width: 768px) {
-            .grid { grid-template-columns: 1fr; }
+        @media (max-width: 1024px) {
+            .grid-3 { grid-template-columns: 1fr; }
         }
 
         .card {
             background: var(--card-bg);
             border-radius: 8px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
         }
 
         .card h2 {
@@ -67,34 +68,36 @@
             color: var(--primary-color);
             border-bottom: 2px solid #edf2f7;
             padding-bottom: 8px;
-            font-size: 1.15rem;
+            font-size: 1.05rem;
+            display: flex;
+            justify-content: space-between;
         }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         label {
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #4a5568;
         }
 
         input, select {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #cbd5e0;
             border-radius: 5px;
             box-sizing: border-box;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             background-color: #fff;
         }
 
         button {
             width: 100%;
-            background-color: #8e44ad;
+            background-color: #2c3e50;
             color: white;
             border: none;
             padding: 15px;
@@ -106,27 +109,43 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+        button:hover { background-color: #1a252f; }
 
-        button:hover { background-color: #7d3c98; }
-
-        /* 終極戰術盒 */
-        .strategy-box {
-            background-color: #f5eef8;
-            border: 2px solid #d7bde2;
+        .battle-box {
+            background-color: #fff;
+            border: 2px solid #e2e8f0;
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 8px;
         }
 
-        .verdict {
+        .verdict-title {
             font-size: 1.3rem;
             font-weight: bold;
             text-align: center;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 15px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
         }
-        .good { background-color: #def7ec; color: #03543f; border: 1px solid #31c48d; }
+
+        /* 排名卡片 */
+        .rank-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .rank-container { grid-template-columns: 1fr; }
+        }
+        .rank-card {
+            padding: 15px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+        }
+        .rank-1 { background-color: #27ae60; }
+        .rank-2 { background-color: #2980b9; }
+        .rank-3 { background-color: #7f8c8d; }
 
         /* 表格樣式 */
         .table-responsive {
@@ -137,128 +156,151 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-align: right;
-            min-width: 900px;
+            min-width: 1100px;
         }
 
         th {
-            background-color: #34495e;
+            background-color: #2c3e50;
             color: white;
-            padding: 12px 10px;
+            padding: 10px;
             font-weight: 500;
+            text-align: center;
         }
 
         tr:nth-child(even) { background-color: #f8fafc; }
-        tr.highlight-cycle { background-color: #eaf2f8; font-weight: bold; }
-        td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
         
         .text-center { text-align: center; }
         .text-danger { color: var(--danger-color); font-weight: 600; }
         .text-success { color: var(--success-color); font-weight: 600; }
         
-        .bg-curr { background-color: #fffaf0; }
-        .bg-loop { background-color: #f4fdf7; }
-        
-        .badge {
-            background-color: #2980b9;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-        }
+        .tab-rent { background-color: #fef9e7; }
+        .tab-own { background-color: #f4fdf7; }
+        .tab-rentrent { background-color: #eaf2f8; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏠 物業轉按終極戰術計算機 v4.0</h1>
-    <div class="subtitle">🔄 模擬「每兩年無限循環轉按」滾雪球套利模型</div>
+    <h1>🏠 香港房產終極策略決戰計算機 v5.0</h1>
+    <div class="subtitle">⚔️ 純租樓 vs 買樓自住 vs 租租策略（買樓出租＋租樓自住）大決戰</div>
     
-    <div class="grid">
-        <div class="card">
-            <h2>1. 現有起點數據</h2>
+    <div class="grid-3">
+        <div class="card" style="border-top: 4px solid var(--warning-color);">
+            <h2>📊 基礎及市場假設</h2>
             <div class="form-group">
-                <label for="startLoan">目前的剩餘貸款額 ($)</label>
-                <input type="number" id="startLoan" value="4000000">
+                <label>目標物業總價值/樓價 ($)</label>
+                <input type="number" id="propValue" value="6000000">
             </div>
             <div class="form-group">
-                <label for="currRate">若【不轉按】的按揭年利率 (%)</label>
-                <input type="number" id="currRate" value="4.125" step="0.001">
+                <label>預計物業每年升值率 (%)</label>
+                <input type="number" id="propGrowth" value="2.0" step="0.1">
             </div>
             <div class="form-group">
-                <label for="startTenure">目前的剩餘供款年期 (年)</label>
-                <input type="number" id="startTenure" value="28">
+                <label>手頭總可用首期/首置資金 ($)</label>
+                <input type="number" id="startCapital" value="2000000">
+            </div>
+            <div class="form-group">
+                <label>非物業投資年回報 (如美股/定期) (%)</label>
+                <input type="number" id="stockGrowth" value="5.0" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>模擬對比年期 (年)</label>
+                <select id="compareYears">
+                    <option value="6" selected>6 年 (中短期對比)</option>
+                    <option value="10">10 年 (中長期趨勢)</option>
+                    <option value="20">20 年 (長期全面大決戰)</option>
+                </select>
             </div>
         </div>
 
-        <div class="card">
-            <h2>2. 未來「每2年無限轉按」參數設定</h2>
+        <div class="card" style="border-top: 4px solid var(--success-color);">
+            <h2>🏦 按揭與房屋持有成本 (自住/出租通用)</h2>
             <div class="form-group">
-                <label for="loopRate">預估未來新按揭平均年利率 (%)</label>
-                <input type="number" id="loopRate" value="3.625" step="0.001">
+                <label>按揭貸款成數 (%)</label>
+                <input type="number" id="loanPct" value="70">
             </div>
             <div class="form-group">
-                <label for="loopTenure">每次轉按，是否重新拉長到 30 年？</label>
-                <select id="loopTenure">
-                    <option value="30" selected>係，每次都拉長回 30 年 (追求最低月供 + 最大防守力)</option>
-                    <option value="remain">唔係，每次都跟隨當時剩餘年期扣減 (只賺回贈同慳息)</option>
-                </select>
+                <label>按揭年利率 (%) *可配合兩年一轉按</label>
+                <input type="number" id="mortRate" value="3.625" step="0.001">
             </div>
             <div class="form-group">
-                <label for="loopCashBack">預估未來平均每次現金回贈 (%)</label>
-                <input type="number" id="loopCashBack" value="1.0" step="0.01">
+                <label>按揭還款年期 (年)</label>
+                <input type="number" id="mortTerm" value="30">
             </div>
             <div class="form-group">
-                <label for="loopLegalFee">預估平均每次轉按律師費 ($)</label>
-                <input type="number" id="loopLegalFee" value="6000">
+                <label>每月管理費 + 差餉地租 ($)</label>
+                <input type="number" id="maintCost" value="2500">
             </div>
             <div class="form-group">
-                <label for="cycleCount">你想模擬未來連續循環轉按幾多次？ (每2年為一次)</label>
-                <select id="cycleCount">
-                    <option value="1">轉 1 次 (睇 2 年效果)</option>
-                    <option value="2">連續轉 2 次 (睇 4 年效果)</option>
-                    <option value="3" selected>連續轉 3 次 (睇 6 年效果)</option>
-                    <option value="4">連續轉 4 次 (睇 8 年效果)</option>
-                    <option value="5">連續轉 5 次 (睇 10 年效果)</option>
-                </select>
+                <label>買樓即時開支 (印花稅+佣金+律師費) ($)</label>
+                <input type="number" id="buyTxCost" value="200000">
+            </div>
+        </div>
+
+        <div class="card" style="border-top: 4px solid var(--secondary-color);">
+            <h2>🔑 租務市場開支設定</h2>
+            <div class="form-group">
+                <label>若【純租樓/租租】自住每月租金 ($)</label>
+                <input type="number" id="rentOut" value="18000">
+            </div>
+            <div class="form-group">
+                <label>若【租租策略】自身物業出租月租金 ($)</label>
+                <input type="number" id="rentIn" value="17000">
+            </div>
+            <div class="form-group">
+                <label>物業出租成本 (15%物業稅 + 0.5個月佣金/年) ($/月)</label>
+                <input type="number" id="taxRentCost" value="2800">
+            </div>
+            <div class="form-group">
+                <label>預計租金每年升幅 (%)</label>
+                <input type="number" id="rentGrowth" value="1.5" step="0.1">
             </div>
         </div>
     </div>
 
-    <button onclick="runUltimateLoopModel()">🌀 啟動「無限循環轉按」滾雪球模型分析</button>
+    <button onclick="clashOfStrategies()">⚔️ 啟動三大策略終極財富沙盤推演</button>
 
-    <div class="card" id="resultArea" style="display:none;">
-        <div class="strategy-box">
-            <h2>📊 【無限轉按流】vs【不轉按流】階段總結</h2>
-            <p>在未來的 <span id="summaryYears" style="font-weight:bold; color:#8e44ad;">0</span> 年內，如果你堅持實施「每兩年一轉」戰術，你將會經歷 <span id="summaryCycles" style="font-weight:bold; color:#8e44ad;">0</span> 次轉按：</p>
-            <ul>
-                <li>期間累計自動穩袋的<b>現金回贈總額</b>：<span id="totalCashBackEarned" class="text-success" style="font-weight:bold;">$0</span></li>
-                <li>期間累計付出的<b>總律師費成本</b>：<span id="totalLegalFeeCost" class="text-danger">-$0</span></li>
-                <li>期間因為利率較低，累計<b>幫你慳到的利息</b>：<span id="totalInterestSaved" class="text-success">+$0</span></li>
-            </ul>
-            <div id="ultimateVerdict" class="verdict good"></div>
+    <div id="resultArea" style="display:none;">
+        <div class="battle-box">
+            <div class="verdict-title">🏆 最終模擬期滿「身家淨資產」總結排名</div>
+            <div class="rank-container">
+                <div class="rank-card rank-1" id="rank1Box">第一名</div>
+                <div class="rank-card rank-2" id="rank2Box">第二名</div>
+                <div class="rank-card rank-3" id="rank3Box">第三名</div>
+            </div>
+            <p style="font-size:0.85rem; margin-top:15px; color:#555; text-align:center;">
+                * <b>身家淨資產</b> 計算公式 = (期末物業價值 - 剩餘按揭貸款) + 期末外圍投資庫存現金 - 期間非資本化開支。數字越高代表該策略幫你滾出的財富越多。
+            </p>
         </div>
 
-        <h2>📅 滾雪球實戰全期對比明細表</h2>
-        <p style="font-size:0.85rem; color:#666;">* 下表為你精準模擬每兩年「重設遊戲」時的真實本金變化。藍色橫條代表<b>轉按執行點</b>，此時本金會被帶入新一輪計算，並觸發回贈與律師費支出。</p>
-        
+        <h2>📅 三大策略每兩年遞進財富對比表</h2>
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th class="text-center">時間</th>
-                        <th class="bg-curr" style="color:#7b341e; text-align:right;">【方案 A：不轉按】<br>當期剩餘本金</th>
-                        <th class="bg-curr" style="color:#7b341e; text-align:right;">【方案 A：不轉按】<br>當期2年利息支出</th>
-                        <th class="bg-loop" style="color:#1b5e20; text-align:right;">【方案 B：無限轉按】<br>當期起步本金</th>
-                        <th class="bg-loop" style="color:#1b5e20; text-align:right;">【方案 B：無限轉按】<br>當期2年利息支出</th>
-                        <th class="text-center">當期新獲回贈</th>
-                        <th class="text-center">當期律師費</th>
-                        <th class="text-success" style="text-align:right;">當期淨利潤<br>(慳息+回贈-手續費)</th>
-                        <th style="text-align:right; background-color:#2c3e50;">累計總淨回報<br>(滾雪球戰果)</th>
+                        <th rowspan="2">時間</th>
+                        <th colspan="3" class="tab-rent" style="color:#7d6608;">方案 A：純租樓自住（資金投向股市）</th>
+                        <th colspan="3" class="tab-own" style="color:#196f3d;">方案 B：買樓自住（自置物業）</th>
+                        <th colspan="3" class="tab-rentrent" style="color:#1b4f72;">方案 C：港式租租（物業出租＋自己租樓）</th>
+                    </tr>
+                    <tr>
+                        <th class="tab-rent">累計付租</th>
+                        <th class="tab-rent">股票資產</th>
+                        <th class="tab-rent" style="font-weight:bold; color:#7d6608;">身家淨資產</th>
+                        
+                        <th class="tab-own">剩餘按揭</th>
+                        <th class="tab-own">物業估值</th>
+                        <th class="tab-own" style="font-weight:bold; color:#196f3d;">身家淨資產</th>
+                        
+                        <th class="tab-rentrent">累計淨租差</th>
+                        <th class="tab-rentrent">物業估值</th>
+                        <th class="tab-rentrent" style="font-weight:bold; color:#1b4f72;">身家淨資產</th>
                     </tr>
                 </thead>
-                <tbody id="loopTableBody">
+                <tbody id="battleTableBody">
                     </tbody>
             </table>
         </div>
@@ -269,130 +311,139 @@
     function getPmt(principal, annualRate, years) {
         let r = (annualRate / 100) / 12;
         let n = years * 12;
-        if (r === 0) return principal / n;
         return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
     }
 
-    // 計算某個特定本金、利率、年期下，運行24個月的利息消耗及最終剩餘本金
-    function run24Months(principal, annualRate, years) {
-        let r = (annualRate / 100) / 12;
-        let pmt = getPmt(principal, annualRate, years);
-        let currentBalance = principal;
-        let totalInterest2Years = 0;
+    function clashOfStrategies() {
+        // 基礎假設
+        let propValue = parseFloat(document.getElementById('propValue').value) || 0;
+        let propGrowth = (parseFloat(document.getElementById('propGrowth').value) || 0) / 100;
+        let startCapital = parseFloat(document.getElementById('startCapital').value) || 0;
+        let stockGrowth = (parseFloat(document.getElementById('stockGrowth').value) || 0) / 100;
+        let compareYears = parseInt(document.getElementById('compareYears').value) || 6;
 
-        for (let m = 1; m <= 24; m++) {
-            if (currentBalance <= 0) break;
-            let interestPaid = currentBalance * r;
-            let principalPaid = pmt - interestPaid;
-            totalInterest2Years += interestPaid;
-            currentBalance -= principalPaid;
-        }
-        if (currentBalance < 0) currentBalance = 0;
-        return { interest: totalInterest2Years, endBalance: currentBalance };
-    }
+        // 按揭相關
+        let loanPct = (parseFloat(document.getElementById('loanPct').value) || 0) / 100;
+        let mortRate = parseFloat(document.getElementById('mortRate').value) || 0;
+        let mortTerm = parseInt(document.getElementById('mortTerm').value) || 0;
+        let maintCost = parseFloat(document.getElementById('maintCost').value) || 0;
+        let buyTxCost = parseFloat(document.getElementById('buyTxCost').value) || 0;
 
-    function runUltimateLoopModel() {
-        let startLoan = parseFloat(document.getElementById('startLoan').value) || 0;
-        let currRate = parseFloat(document.getElementById('currRate').value) || 0;
-        let startTenure = parseInt(document.getElementById('startTenure').value) || 0;
+        // 租務相關
+        let rentOut = parseFloat(document.getElementById('rentOut').value) || 0; // 自己去租
+        let rentIn = parseFloat(document.getElementById('rentIn').value) || 0;   // 買樓出租人
+        let taxRentCost = parseFloat(document.getElementById('taxRentCost').value) || 0;
+        let rentGrowth = (parseFloat(document.getElementById('rentGrowth').value) || 0) / 100;
 
-        let loopRate = parseFloat(document.getElementById('loopRate').value) || 0;
-        let loopTenureOpt = document.getElementById('loopTenure').value;
-        let loopCashBackPct = parseFloat(document.getElementById('loopCashBack').value) || 0;
-        let loopLegalFee = parseFloat(document.getElementById('loopLegalFee').value) || 0;
-        let cycleCount = parseInt(document.getElementById('cycleCount').value) || 1;
-
-        if (startLoan <= 0 || startTenure <= 0) {
-            alert('請填寫正確的基礎按揭數據。');
-            return;
-        }
-
-        let tableBody = document.getElementById('loopTableBody');
+        let tableBody = document.getElementById('battleTableBody');
         tableBody.innerHTML = '';
 
-        let currentBalanceA = startLoan;
-        let currentBalanceB = startLoan;
+        // --- 初始化三大方案變數 ---
         
-        let cumCashBack = 0;
-        let cumLegalFee = 0;
-        let cumInterestSaved = 0;
-        let cumNetProfit = 0;
+        // 方案 A：純租樓
+        let rentA_currentRent = rentOut;
+        let rentA_stockBalance = startCapital; // 所有錢直接掉入股市/投資
+        let rentA_totalRentPaid = 0;
 
-        let tenureA = startTenure;
-        let tenureB = startTenure;
+        // 方案 B：買樓自住
+        let ownB_propValue = propValue;
+        let ownB_loanAmount = propValue * loanPct;
+        let ownB_pmt = getPmt(ownB_loanAmount, mortRate, mortTerm);
+        // 買樓後剩餘資金放股市
+        let ownB_stockBalance = startCapital - (propValue * (1 - loanPct)) - buyTxCost; 
+        if (ownB_stockBalance < 0) ownB_stockBalance = 0; 
 
-        // 開始以 2 年為一個 Cycle 進行齒輪式精準滾動計算
-        for (let i = 1; i <= cycleCount; i++) {
-            let yearLabel = `第 ${(i-1)*2 + 1}-${i*2} 年`;
+        // 方案 C：租租策略
+        let rrC_propValue = propValue;
+        let rrC_loanAmount = propValue * loanPct;
+        let rrC_pmt = getPmt(rrC_loanAmount, mortRate, mortTerm);
+        let rrC_stockBalance = startCapital - (propValue * (1 - loanPct)) - buyTxCost;
+        if (rrC_stockBalance < 0) rrC_stockBalance = 0;
+        let rrC_currentRentIn = rentIn;   // 收租
+        let rrC_currentRentOut = rentOut; // 付租
+        let rrC_cumRentGapExpense = 0;
+
+        // 每兩年步進計算
+        for (let year = 2; year <= compareYears; year += 2) {
             
-            // 方案 A（維持現狀）這兩年的狀況
-            let resA = run24Months(currentBalanceA, currRate, tenureA);
-            tenureA -= 2; // 舊方案年期自然扣減
-            if (tenureA < 0) tenureA = 0;
-
-            // 方案 B（無限轉按）這兩年的狀況
-            // 決定這一輪轉按要開展的年期
-            let currentTermB = (loopTenureOpt === '30') ? 30 : tenureB;
-            
-            let resB = run24Months(currentBalanceB, loopRate, currentTermB);
-            
-            // 計算這一次轉按所帶來的即時現金回贈（基於這一輪的起步本金計算）
-            let thisCashBack = currentBalanceB * (loopCashBackPct / 100);
-            let thisLegalFee = loopLegalFee;
-            let thisInterestSaved = resA.interest - resB.interest;
-            let thisNetProfit = thisInterestSaved + thisCashBack - thisLegalFee;
-
-            // 滾雪球累加
-            cumCashBack += thisCashBack;
-            cumLegalFee += thisLegalFee;
-            cumInterestSaved += thisInterestSaved;
-            cumNetProfit += thisNetProfit;
-
-            // 建立轉按動作高亮行
-            let trAction = document.createElement('tr');
-            trAction.className = "highlight-cycle";
-            trAction.innerHTML = `
-                <td colspan="9" class="text-center" style="color: #2980b9; font-size:0.8rem; background-color:#e1f5fe;">
-                    🔄 【第 ${i} 次轉按執行】成功投奔新銀行 ── 賺取新一輪 ${loopCashBackPct}% 回贈，重設合約
-                </td>
-            `;
-            tableBody.appendChild(trAction);
-
-            // 建立數據對比行
-            let trData = document.createElement('tr');
-            trData.innerHTML = `
-                <td class="text-center" style="font-weight:bold;">${yearLabel}<br><span class="badge">Cycle ${i}</span></td>
-                <td class="bg-curr">$${Math.round(currentBalanceA).toLocaleString()}</td>
-                <td class="bg-curr">$${Math.round(resA.interest).toLocaleString()}</td>
-                <td class="bg-loop" style="font-weight:bold; color:#1b5e20;">$${Math.round(currentBalanceB).toLocaleString()}</td>
-                <td class="bg-loop">$${Math.round(resB.interest).toLocaleString()}</td>
-                <td class="text-center text-success">+$${Math.round(thisCashBack).toLocaleString()}</td>
-                <td class="text-center text-danger">-$${Math.round(thisLegalFee).toLocaleString()}</td>
-                <td class="text-right text-success" style="font-weight:600;">$${Math.round(thisNetProfit).toLocaleString()}</td>
-                <td class="text-right" style="font-weight:bold; color:#8e44ad; background-color:#fcf3cf;">$${Math.round(cumNetProfit).toLocaleString()}</td>
-            `;
-            tableBody.appendChild(trData);
-
-            // 【核心滾動機制】將這一期期末的剩餘本金，完美交接變成下一期的起步本金
-            currentBalanceA = resA.endBalance;
-            currentBalanceB = resB.endBalance;
-            
-            // 如果方案B選擇不拉長，年期就自然跟隨扣減
-            if (loopTenureOpt !== '30') {
-                tenureB -= 2;
-                if (tenureB < 0) tenureB = 0;
+            // -------- 方案 A 演進 (2年) --------
+            for(let m=0; m<24; m++) {
+                rentA_totalRentPaid += rentA_currentRent;
+                // 每月付完租金後，剩餘的股票大盤滾動
+                rentA_stockBalance = rentA_stockBalance * (1 + stockGrowth/12);
             }
+            let netAssetA = rentA_stockBalance; // 純租樓身家就是股票價值
+            rentA_currentRent *= (1 + rentGrowth * 2); // 每兩年續租續加
+
+            // -------- 方案 B 演進 (2年) --------
+            let r_idx = (mortRate/100)/12;
+            let b_interest_2years = 0;
+            for(let m=0; m<24; m++) {
+                let intr = ownB_loanAmount * r_idx;
+                let prin = ownB_pmt - intr;
+                b_interest_2years += intr;
+                ownB_loanAmount -= prin;
+                ownB_stockBalance = ownB_stockBalance * (1 + stockGrowth/12);
+            }
+            ownB_propValue *= Math.pow(1 + propGrowth, 2); // 樓價升值
+            let netAssetB = (ownB_propValue - ownB_loanAmount) + ownB_stockBalance - (maintCost * 24);
+
+            // -------- 方案 C 演進 (2年) --------
+            let c_interest_2years = 0;
+            for(let m=0; m<24; m++) {
+                let intr = rrC_loanAmount * r_idx;
+                let prin = rrC_pmt - intr;
+                c_interest_2years += intr;
+                rrC_loanAmount -= prin;
+                
+                // 租租每月的淨現金流缺口 = 自身供樓 + 管理費 + 自己付租 + 出租稅務開支 - 收取別人的租金
+                let monthlyGap = rrC_pmt + maintCost + rrC_currentRentOut + taxRentCost - rrC_currentRentIn;
+                rrC_cumRentGapExpense += monthlyGap;
+                
+                rrC_stockBalance = rrC_stockBalance * (1 + stockGrowth/12);
+            }
+            rrC_propValue *= Math.pow(1 + propGrowth, 2);
+            // 租租策略身家 = 物業權益 + 股票存量 - 累計租金與供樓產生的淨現金流消耗
+            let netAssetC = (rrC_propValue - rrC_loanAmount) + rrC_stockBalance - rrC_cumRentGapExpense;
+            
+            // 租金兩年一變
+            rrC_currentRentIn *= (1 + rentGrowth * 2);
+            rrC_currentRentOut *= (1 + rentGrowth * 2);
+
+            // -------- 渲染表格行 --------
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="text-center" style="font-weight:bold;">第 ${year} 年完結</td>
+                <td class="tab-rent">$${Math.round(rentA_totalRentPaid).toLocaleString()}</td>
+                <td class="tab-rent">$${Math.round(rentA_stockBalance).toLocaleString()}</td>
+                <td class="tab-rent" style="font-weight:bold; color:#7d6608;">$${Math.round(netAssetA).toLocaleString()}</td>
+                <td class="tab-own">$${Math.round(ownB_loanAmount).toLocaleString()}</td>
+                <td class="tab-own">$${Math.round(ownB_propValue).toLocaleString()}</td>
+                <td class="tab-own" style="font-weight:bold; color:#196f3d;">$${Math.round(netAssetB).toLocaleString()}</td>
+                <td class="tab-rentrent">$${Math.round(rrC_cumRentGapExpense).toLocaleString()}</td>
+                <td class="tab-rentrent">$${Math.round(rrC_propValue).toLocaleString()}</td>
+                <td class="tab-rentrent" style="font-weight:bold; color:#1b4f72;">$${Math.round(netAssetC).toLocaleString()}</td>
+            `;
+            tableBody.appendChild(tr);
         }
 
-        // 渲染總覽區
-        document.getElementById('summaryYears').innerText = cycleCount * 2;
-        document.getElementById('summaryCycles').innerText = cycleCount;
-        document.getElementById('totalCashBackEarned').innerText = '$' + Math.round(cumCashBack).toLocaleString();
-        document.getElementById('totalLegalFeeCost').innerText = '-$' + Math.round(cumLegalFee).toLocaleString();
-        document.getElementById('totalInterestSaved').innerText = '+$' + Math.round(cumInterestSaved).toLocaleString();
+        // --- 最終年期期末結算排名 ---
+        let finalA = rentA_stockBalance;
+        let finalB = (ownB_propValue - ownB_loanAmount) + ownB_stockBalance - (maintCost * compareYears * 12);
+        let finalC = (rrC_propValue - rrC_loanAmount) + rrC_stockBalance - rrC_cumRentGapExpense;
 
-        let verdictBox = document.getElementById('ultimateVerdict');
-        verdictBox.innerHTML = `🚀 滾雪球戰略成果：未來 ${cycleCount * 2} 年透過「每兩年一轉按」，你預計可以比完全不轉按，**額外幫自己創造 $${Math.round(cumNetProfit).toLocaleString()} 嘅實質淨財富**！`;
+        let results = [
+            { name: "👑 方案 A：純租樓流 (資金全投外圍)", value: finalA },
+            { name: "🏠 方案 B：買樓自住流 (鎖定樓市升幅)", value: finalB },
+            { name: "🔄 方案 C：港式租租流 (兩邊開弓套利)", value: finalC }
+        ];
+
+        // 排序
+        results.sort((a, b) => b.value - a.value);
+
+        document.getElementById('rank1Box').innerHTML = `🥇 第一名<br>${results[0].name}<br>身家: $${Math.round(results[0].value).toLocaleString()}`;
+        document.getElementById('rank2Box').innerHTML = `🥈 第二名<br>${results[1].name}<br>身家: $${Math.round(results[1].value).toLocaleString()}`;
+        document.getElementById('rank3Box').innerHTML = `🥉 第三名<br>${results[2].name}<br>身家: $${Math.round(results[2].value).toLocaleString()}`;
 
         document.getElementById('resultArea').style.display = 'block';
         document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
