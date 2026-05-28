@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>轉按終極策略 v6.1 - 手機分頁版</title>
+    <title>轉按終極策略 v6.2 - 數據補完版</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -15,6 +15,7 @@
             --text: #333;
             --ml: #8e44ad;
             --border: #e2e8f0;
+            --planA: #8a4b38; /* 方案A專用顏色 */
         }
 
         body {
@@ -24,7 +25,7 @@
             line-height: 1.5;
             margin: 0;
             padding: 0;
-            padding-bottom: 80px; /* 預留底部導航欄空間 */
+            padding-bottom: 80px; 
         }
 
         .header {
@@ -43,42 +44,25 @@
 
         .container { padding: 15px; max-width: 800px; margin: 0 auto; }
 
-        /* 分頁控制 (Tab Content) */
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 底部導航欄 (Bottom Navigation) */
         .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: white;
-            display: flex;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            z-index: 1000;
+            position: fixed; bottom: 0; left: 0; right: 0; background: white;
+            display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000;
         }
         .nav-btn {
-            flex: 1;
-            padding: 12px 0;
-            text-align: center;
-            color: #718096;
-            font-size: 0.85rem;
-            font-weight: bold;
-            background: none; border: none; outline: none;
-            cursor: pointer;
-            border-top: 3px solid transparent;
+            flex: 1; padding: 12px 0; text-align: center; color: #718096;
+            font-size: 0.85rem; font-weight: bold; background: none; border: none;
+            cursor: pointer; border-top: 3px solid transparent;
         }
         .nav-btn.active { color: var(--secondary); border-top-color: var(--secondary); background: #ebf5fb; }
         .nav-btn span { display: block; font-size: 1.2rem; margin-bottom: 2px; }
 
-        /* 卡片設計 */
         .card {
-            background: var(--card);
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            margin-bottom: 15px;
-            border: 1px solid var(--border);
+            background: var(--card); border-radius: 10px; padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid var(--border);
         }
         .card h2 { margin-top: 0; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
 
@@ -94,7 +78,6 @@
         .flex-row { display: flex; gap: 10px; }
         .flex-row .form-group { flex: 1; }
 
-        /* 自訂面板卡片 (Mobile Friendly) */
         .cycle-card {
             background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;
             border-left: 4px solid var(--secondary);
@@ -114,24 +97,35 @@
             opacity: 0; transition: opacity 0.3s; z-index: 1000; pointer-events: none;
         }
 
-        /* 表格響應式 */
         .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 800px; text-align: right; }
-        th { background-color: var(--primary); color: white; padding: 8px; position: sticky; top: 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: right; }
+        
+        /* 針對兩個表格設定不同的最小寬度，確保手機左右滑動空間足夠 */
+        #loopTable { min-width: 950px; }
+        #detailTable { min-width: 1050px; }
+        
+        th { background-color: var(--primary); color: white; padding: 8px; position: sticky; top: 0; text-align: center; }
         td { padding: 8px; border-bottom: 1px solid #edf2f7; }
         tr:nth-child(even) { background-color: #f8fafc; }
-        .text-center { text-align: center; } .text-success { color: var(--success); font-weight: bold; }
-        .text-danger { color: var(--danger); font-weight: bold; } .text-ml { color: var(--ml); font-weight: bold; }
+        .text-center { text-align: center; } 
+        .text-success { color: var(--success); font-weight: bold; }
+        .text-danger { color: var(--danger); font-weight: bold; } 
+        .text-ml { color: var(--ml); font-weight: bold; }
+        .text-planA { color: var(--planA); }
         
         .summary-box { background: #f5eef8; border: 2px solid #d7bde2; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
         .summary-box ul { padding-left: 20px; margin: 10px 0; font-size: 0.9rem; }
+        
+        /* 標題分類顏色背景 */
+        .th-planA { background-color: #5d4037 !important; }
+        .th-planB { background-color: #2e4053 !important; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>🏠 轉按終極策略沙盤 v6.1</h1>
-    <p>手機優化排版 ‧ 拉單選取 ‧ ML戶口對沖</p>
+    <h1>🏠 轉按終極策略沙盤 v6.2</h1>
+    <p>手機優化排版 ‧ 拉單選取 ‧ 完整數據對比</p>
 </div>
 
 <div id="saveToast" class="save-toast">已儲存</div>
@@ -190,7 +184,7 @@
     <div id="tab2" class="tab-content">
         <div class="card">
             <h2>📋 每期自訂面板</h2>
-            <p style="font-size:0.8rem; color:#666;">* 可獨立微調某一次的成數(加按)或利率。選擇「同上」會自動跟隨基礎設定。回贈及律師費預設全部相同，但可手動修改。</p>
+            <p style="font-size:0.8rem; color:#666;">* 可獨立微調某一次的成數或利率。選擇「同上」會自動跟隨基礎設定。</p>
             <div id="cyclePanelContainer"></div>
             <button class="btn-main" onclick="runCalculation()">🌀 立即運算結果</button>
         </div>
@@ -212,7 +206,29 @@
 
         <div class="card" id="resultTableCard" style="display:none; padding:10px;">
             <h2 style="font-size:1rem;">📅 兩年期對比大盤</h2>
-            <div class="table-wrap"><table id="loopTable"><thead><tr><th>期數</th><th>不轉按息</th><th>轉按起步本金</th><th>轉按息</th><th>新回贈</th><th>加按套現</th><th>ML賺息</th><th>淨財富增長</th><th>累計總回報</th></tr></thead><tbody id="loopTableBody"></tbody></table></div>
+            <div class="table-wrap">
+                <table id="loopTable">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="background-color:#34495e;">期數</th>
+                            <th colspan="2" class="th-planA">【A】不轉按</th>
+                            <th colspan="6" class="th-planB">【B】轉按加按策略</th>
+                            <th rowspan="2" style="background-color:#2c3e50;">累計總回報</th>
+                        </tr>
+                        <tr>
+                            <th class="th-planA">期內總利息</th>
+                            <th class="th-planA">期末剩餘本金</th>
+                            <th class="th-planB">起步本金</th>
+                            <th class="th-planB">期內總利息</th>
+                            <th class="th-planB">新回贈</th>
+                            <th class="th-planB">加按套現</th>
+                            <th class="th-planB">ML賺息</th>
+                            <th class="th-planB">淨財富增長</th>
+                        </tr>
+                    </thead>
+                    <tbody id="loopTableBody"></tbody>
+                </table>
+            </div>
         </div>
 
         <div class="card" id="detailTableCard" style="display:none; padding:10px;">
@@ -220,15 +236,31 @@
                 <span>🔍 月度明細精查</span>
                 <select id="selectDetailYear" style="width:120px; font-size:0.85rem; padding:5px;" onchange="renderMonthlyDetailTable()"></select>
             </h2>
-            <div class="table-wrap"><table id="detailTable"><thead><tr><th>月份</th><th>[A]不轉按息</th><th>[B]轉按月供</th><th>[B]利息</th><th>[B]剩餘本金</th><th>ML結餘</th><th>ML賺息</th><th>[B]實質淨息</th></tr></thead><tbody id="monthlyDetailTableBody"></tbody></table></div>
+            <div class="table-wrap">
+                <table id="detailTable">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="background-color:#34495e;">月份</th>
+                            <th colspan="3" class="th-planA">【A】不轉按</th>
+                            <th colspan="6" class="th-planB">【B】轉按加按策略</th>
+                        </tr>
+                        <tr>
+                            <th class="th-planA">月供</th>
+                            <th class="th-planA">利息</th>
+                            <th class="th-planA">剩餘本金</th>
+                            <th class="th-planB">月供</th>
+                            <th class="th-planB">利息</th>
+                            <th class="th-planB">剩餘本金</th>
+                            <th class="th-planB" style="color:#d2b4de;">ML結餘</th>
+                            <th class="th-planB" style="color:#d2b4de;">ML賺息</th>
+                            <th class="th-planB" style="color:#a9cce3;">實質淨息</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthlyDetailTableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
-
-<div class="bottom-nav">
-    <button class="nav-btn active" onclick="switchTab(1)" id="btnTab1"><span>⚙️</span>設定</button>
-    <button class="nav-btn" onclick="switchTab(2)" id="btnTab2"><span>📋</span>策略</button>
-    <button class="nav-btn" onclick="switchTab(3)" id="btnTab3"><span>📊</span>結果</button>
 </div>
 
 <script>
@@ -252,7 +284,6 @@
         return h;
     }
 
-    // 初始化全局預設拉單
     function initGlobalDropdowns() {
         let rSelect = document.getElementById('loopRate');
         let tSelect = document.getElementById('loopTenure');
@@ -269,7 +300,6 @@
         loadSavedCycleData();
     };
 
-    // 分頁切換
     function switchTab(tabIndex) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -278,7 +308,6 @@
         window.scrollTo(0,0);
     }
 
-    // UI 構建：生成每期卡片
     function buildCyclePanel() {
         let count = parseInt(document.getElementById('cycleCount').value);
         let container = document.getElementById('cyclePanelContainer');
@@ -321,11 +350,9 @@
         }
     }
 
-    // 儲存邏輯
     function flashToast() {
         let t = document.getElementById('saveToast');
-        t.style.opacity = 1;
-        setTimeout(() => t.style.opacity = 0, 1000);
+        t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 1000);
     }
     function autoSave() {
         let data = {
@@ -335,7 +362,7 @@
             globalFee: document.getElementById('globalFee').value, rebateAction: document.getElementById('rebateAction').value,
             mlAction: document.getElementById('mlAction').value, cycleCount: document.getElementById('cycleCount').value
         };
-        localStorage.setItem('refi_v61_global', JSON.stringify(data)); flashToast();
+        localStorage.setItem('refi_v62_global', JSON.stringify(data)); flashToast();
     }
     function saveCycleData() {
         let count = parseInt(document.getElementById('cycleCount').value); let rows = [];
@@ -346,16 +373,16 @@
                 fee: document.getElementById(`fee_c${i}`).value
             });
         }
-        localStorage.setItem('refi_v61_cycles', JSON.stringify(rows)); flashToast();
+        localStorage.setItem('refi_v62_cycles', JSON.stringify(rows)); flashToast();
     }
     function loadSavedData() {
-        let s = localStorage.getItem('refi_v61_global'); if(!s) return; let d = JSON.parse(s);
+        let s = localStorage.getItem('refi_v62_global'); if(!s) return; let d = JSON.parse(s);
         ['startLoan','currRate','startTenure','loopRate','loopTenure','globalRebate','globalFee','rebateAction','mlAction','cycleCount'].forEach(id => {
             if(d[id]) document.getElementById(id).value = d[id];
         });
     }
     function loadSavedCycleData() {
-        let s = localStorage.getItem('refi_v61_cycles'); if(!s) return;
+        let s = localStorage.getItem('refi_v62_cycles'); if(!s) return;
         let rows = JSON.parse(s); let count = parseInt(document.getElementById('cycleCount').value);
         for(let i=1; i<=count; i++) {
             if(rows[i-1] && document.getElementById(`rate_c${i}`)) {
@@ -368,9 +395,8 @@
         }
     }
 
-    // 運算核心
     function runCalculation() {
-        switchTab(3); // 自動跳到結果頁
+        switchTab(3);
 
         let startLoan = parseFloat(document.getElementById('startLoan').value) || 0;
         let currRate = parseFloat(document.getElementById('currRate').value) || 0;
@@ -384,7 +410,7 @@
         globalMonthlyLogA = []; globalMonthlyLogB = [];
         let totalMonths = cycleCount * 2 * 12;
 
-        // 方案 A (不轉按)
+        // 方案 A (不轉按) - 加入儲存 pmt
         let balanceA = startLoan; let tenureMonthsA = startTenure * 12; let rA = (currRate / 100) / 12;
         for (let m = 1; m <= totalMonths; m++) {
             let pmtA = 0, intA = 0, prinA = 0;
@@ -394,7 +420,8 @@
                 if (prinA > balanceA) { prinA = balanceA; pmtA = intA + prinA; }
                 balanceA -= prinA; tenureMonthsA--;
             }
-            if(balanceA<0) balanceA=0; globalMonthlyLogA.push({ int: intA, bal: balanceA });
+            if(balanceA<0) balanceA=0; 
+            globalMonthlyLogA.push({ pmt: pmtA, int: intA, bal: balanceA }); // 新增紀錄 pmt
         }
 
         // 方案 B (轉按)
@@ -404,7 +431,6 @@
         let cumInterestA = 0, cumInterestB = 0, cumMLEarned = 0, cumNetProfit = 0;
 
         for (let i = 1; i <= cycleCount; i++) {
-            // 讀取拉單並處理 "inherit"
             let vRate = document.getElementById(`rate_c${i}`).value;
             let vTenure = document.getElementById(`tenure_c${i}`).value;
             let vRatio = document.getElementById(`ratio_c${i}`).value;
@@ -457,6 +483,9 @@
             let intPaidAThisCycle = 0;
             for (let m = 1; m <= 24; m++) intPaidAThisCycle += globalMonthlyLogA[((i-1)*24)+m-1].int;
 
+            // 獲取該兩年期末的方案A剩餘本金
+            let balAEndCycle = globalMonthlyLogA[(i * 24) - 1] ? globalMonthlyLogA[(i * 24) - 1].bal : 0;
+
             let netIntSaved = intPaidAThisCycle - intPaidThisCycle + mlEarnedThisCycle;
             let netProfit = netIntSaved + thisCB - thisFee;
 
@@ -465,21 +494,21 @@
 
             let tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="text-center">C${i}</td>
-                <td>$${Math.round(intPaidAThisCycle).toLocaleString()}</td>
-                <td style="font-weight:bold; color:var(--primary);">$${Math.round(startBalCycle).toLocaleString()}</td>
+                <td class="text-center" style="font-weight:bold;">C${i}</td>
+                <td class="text-planA">$${Math.round(intPaidAThisCycle).toLocaleString()}</td>
+                <td class="text-planA" style="font-weight:bold;">$${Math.round(balAEndCycle).toLocaleString()}</td>
+                <td style="font-weight:bold; color:var(--secondary);">$${Math.round(startBalCycle).toLocaleString()}</td>
                 <td>$${Math.round(intPaidThisCycle).toLocaleString()}</td>
                 <td class="text-success">+$${Math.round(thisCB).toLocaleString()}</td>
                 <td class="text-ml">$${Math.round(thisCycleCashOut).toLocaleString()}</td>
                 <td class="text-ml">+$${Math.round(mlEarnedThisCycle).toLocaleString()}</td>
                 <td class="text-success">$${Math.round(netProfit).toLocaleString()}</td>
-                <td style="font-weight:bold; background:#fcf3cf;">$${Math.round(cumNetProfit).toLocaleString()}</td>
+                <td style="font-weight:bold; background:#fcf3cf; color:#b7950b;">$${Math.round(cumNetProfit).toLocaleString()}</td>
             `;
             tbody.appendChild(tr);
             prevCashBack = thisCB;
         }
 
-        // 總結面板
         document.getElementById('sumYears').innerText = cycleCount * 2;
         document.getElementById('sumCB').innerText = '$' + Math.round(cumCashBack).toLocaleString();
         document.getElementById('sumFee').innerText = '-$' + Math.round(cumLegalFee).toLocaleString();
@@ -493,7 +522,6 @@
         
         document.getElementById('sumNetProfit').innerText = '$' + Math.round(cumNetProfit).toLocaleString();
         
-        // 年份選單
         let selY = document.getElementById('selectDetailYear'); selY.innerHTML = '';
         for (let y = 1; y <= cycleCount * 2; y++) {
             let opt = document.createElement('option'); opt.value = y; opt.innerText = `第 ${y} 年`;
@@ -515,11 +543,14 @@
             let logA = globalMonthlyLogA[startM + m]; let logB = globalMonthlyLogB[startM + m];
             let tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="text-center">${m+1}</td>
-                <td>$${Math.round(logA.int).toLocaleString()}</td>
+                <td class="text-center" style="font-weight:bold;">${m+1}</td>
+                <td class="text-planA">$${Math.round(logA.pmt).toLocaleString()}</td>
+                <td class="text-planA">$${Math.round(logA.int).toLocaleString()}</td>
+                <td class="text-planA" style="font-weight:bold;">$${Math.round(logA.bal).toLocaleString()}</td>
+                
                 <td>$${Math.round(logB.pmt).toLocaleString()}</td>
                 <td class="text-danger">$${Math.round(logB.int).toLocaleString()}</td>
-                <td>$${Math.round(logB.bal).toLocaleString()}</td>
+                <td style="font-weight:bold;">$${Math.round(logB.bal).toLocaleString()}</td>
                 <td style="color:var(--ml);">$${Math.round(logB.mlBal).toLocaleString()}</td>
                 <td class="text-success">+$${Math.round(logB.mlInt).toLocaleString()}</td>
                 <td style="font-weight:bold; color:var(--secondary); background:#eaf2f8;">$${Math.round(logB.netInt).toLocaleString()}</td>
