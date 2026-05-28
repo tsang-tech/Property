@@ -3,512 +3,530 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>高級物業轉按 30年供款比對計算機</title>
+    <title>轉按終極策略 v6.1 - 手機分頁版</title>
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #2980b9;
-            --success-color: #27ae60;
-            --danger-color: #c0392b;
-            --bg-color: #f4f6f8;
-            --card-bg: #ffffff;
-            --text-color: #333;
+            --primary: #2c3e50;
+            --secondary: #2980b9;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --bg: #f4f6f8;
+            --card: #ffffff;
+            --text: #333;
+            --ml: #8e44ad;
+            --border: #e2e8f0;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--bg);
+            color: var(--text);
             line-height: 1.5;
             margin: 0;
-            padding: 20px;
-            padding-bottom: 80px; /* 為底部導航留位 */
+            padding: 0;
+            padding-bottom: 80px; /* 預留底部導航欄空間 */
         }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 25px;
-            font-size: 1.5rem;
-        }
-
-        /* 原有 Grid 隱藏，改用 Tab 顯示 */
-        .card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-
-        .card h2 {
-            margin-top: 0;
-            color: var(--primary-color);
-            border-bottom: 2px solid #edf2f7;
-            padding-bottom: 8px;
-            font-size: 1.15rem;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #4a5568;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e0;
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-size: 1rem;
-            background-color: #fff;
-        }
-
-        button {
-            width: 100%;
-            background-color: var(--success-color);
+        .header {
+            background-color: var(--primary);
             color: white;
-            border: none;
-            padding: 14px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-bottom: 10px;
-        }
-
-        button:hover { background-color: #219653; }
-        
-        .btn-next { background-color: var(--secondary-color); }
-        .btn-next:hover { background-color: #1a5276; }
-
-        .summary-box {
-            background-color: #ebf8ff;
-            border-left: 5px solid var(--secondary-color);
             padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-
-        .verdict {
-            font-size: 1.2rem;
-            font-weight: bold;
             text-align: center;
-            padding: 12px;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-        .good { background-color: #def7ec; color: #03543f; }
-        .bad { background-color: #fde8e8; color: #9b1c1c; }
-
-        /* 表格樣式 */
-        .table-responsive {
-            overflow-x: auto;
-            margin-top: 15px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            text-align: right;
-            min-width: 800px;
-        }
-
-        th {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px;
-            font-weight: 500;
-        }
-
-        th.sticky-col, td.sticky-col {
             position: sticky;
-            left: 0;
-            background-color: #f8f9fa;
-            text-align: center;
-            font-weight: bold;
-            z-index: 1;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        th.sticky-col { background-color: #1a252f; z-index: 2; }
 
-        tr:nth-child(even) { background-color: #f8fafc; }
-        td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
-        
-        .text-center { text-align: center; }
-        .text-danger { color: var(--danger-color); font-weight: 600; }
-        .text-success { color: var(--success-color); font-weight: 600; }
-        
-        .bg-curr { background-color: #fffaf0; }
-        .bg-new { background-color: #f0fdf4; }
+        .header h1 { margin: 0; font-size: 1.2rem; }
+        .header p { margin: 5px 0 0 0; font-size: 0.8rem; color: #cbd5e0; }
 
-        /* 分頁系統及底部導航 CSS */
+        .container { padding: 15px; max-width: 800px; margin: 0 auto; }
+
+        /* 分頁控制 (Tab Content) */
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        /* 底部導航欄 (Bottom Navigation) */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #fff;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            bottom: 0; left: 0; right: 0;
+            background: white;
             display: flex;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             z-index: 1000;
-            padding-bottom: env(safe-area-inset-bottom);
         }
-
-        .nav-item {
+        .nav-btn {
             flex: 1;
-            text-align: center;
             padding: 12px 0;
-            font-size: 0.9rem;
-            font-weight: bold;
+            text-align: center;
             color: #718096;
+            font-size: 0.85rem;
+            font-weight: bold;
+            background: none; border: none; outline: none;
             cursor: pointer;
             border-top: 3px solid transparent;
         }
+        .nav-btn.active { color: var(--secondary); border-top-color: var(--secondary); background: #ebf5fb; }
+        .nav-btn span { display: block; font-size: 1.2rem; margin-bottom: 2px; }
 
-        .nav-item.active {
-            color: var(--secondary-color);
-            border-top-color: var(--secondary-color);
-            background-color: #ebf8ff;
+        /* 卡片設計 */
+        .card {
+            background: var(--card);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
         }
+        .card h2 { margin-top: 0; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: #4a5568; }
+        input, select {
+            width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px;
+            box-sizing: border-box; font-size: 1rem; background-color: #fff;
+            appearance: none; -webkit-appearance: none;
+        }
+        select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23a0aec0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 12px auto; }
+        
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row .form-group { flex: 1; }
+
+        /* 自訂面板卡片 (Mobile Friendly) */
+        .cycle-card {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;
+            border-left: 4px solid var(--secondary);
+        }
+        .cycle-header { font-weight: bold; color: var(--secondary); margin-bottom: 10px; font-size: 1rem; display: flex; justify-content: space-between; }
+        .cycle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .btn-main {
+            width: 100%; background-color: var(--ml); color: white; border: none; padding: 15px;
+            font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 10px; margin-bottom: 20px;
+        }
+
+        .save-toast {
+            position: fixed; top: 70px; right: 15px; background: rgba(39, 174, 96, 0.9);
+            color: white; padding: 8px 15px; border-radius: 20px; font-size: 0.8rem;
+            opacity: 0; transition: opacity 0.3s; z-index: 1000; pointer-events: none;
+        }
+
+        /* 表格響應式 */
+        .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 800px; text-align: right; }
+        th { background-color: var(--primary); color: white; padding: 8px; position: sticky; top: 0; }
+        td { padding: 8px; border-bottom: 1px solid #edf2f7; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        .text-center { text-align: center; } .text-success { color: var(--success); font-weight: bold; }
+        .text-danger { color: var(--danger); font-weight: bold; } .text-ml { color: var(--ml); font-weight: bold; }
+        
+        .summary-box { background: #f5eef8; border: 2px solid #d7bde2; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        .summary-box ul { padding-left: 20px; margin: 10px 0; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
+<div class="header">
+    <h1>🏠 轉按終極策略沙盤 v6.1</h1>
+    <p>手機優化排版 ‧ 拉單選取 ‧ ML戶口對沖</p>
+</div>
+
+<div id="saveToast" class="save-toast">已儲存</div>
+
 <div class="container">
-    <h1>🏠 高級物業轉按 30年供款比對計算機</h1>
-    
     <div id="tab1" class="tab-content active">
         <div class="card">
-            <h2>1. 現有按揭（維持現狀）</h2>
+            <h2>1. 目前按揭狀態</h2>
+            <div class="form-group"><label>剩餘貸款額 ($)</label><input type="number" id="startLoan" value="4000000" oninput="autoSave()"></div>
+            <div class="flex-row">
+                <div class="form-group"><label>不轉按利率 (%)</label><input type="number" id="currRate" value="4.125" step="0.001" oninput="autoSave()"></div>
+                <div class="form-group"><label>剩餘年期 (年)</label><input type="number" id="startTenure" value="28" oninput="autoSave()"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>2. 全局預設參數 (供日後每期繼承)</h2>
+            <div class="flex-row">
+                <div class="form-group"><label>預設新利率 (%)</label><select id="loopRate" onchange="autoSave()"></select></div>
+                <div class="form-group"><label>預設重設年期</label><select id="loopTenure" onchange="autoSave()"></select></div>
+            </div>
+            <div class="flex-row">
+                <div class="form-group"><label>預設回贈 (%)</label><input type="number" id="globalRebate" value="1.0" step="0.01" oninput="updateAllCycleInputs(); autoSave();"></div>
+                <div class="form-group"><label>預設律師費 ($)</label><input type="number" id="globalFee" value="6000" oninput="updateAllCycleInputs(); autoSave();"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>3. 策略與資金流向</h2>
             <div class="form-group">
-                <label for="currLoan">現時剩餘貸款額 ($)</label>
-                <input type="number" id="currLoan" value="4000000">
+                <label>🔄 想連續轉按幾多次？ (2年一轉)</label>
+                <select id="cycleCount" onchange="buildCyclePanel(); autoSave();">
+                    <option value="3">轉 3 次 (6 年)</option>
+                    <option value="5" selected>轉 5 次 (10 年)</option>
+                    <option value="10">轉 10 次 (20 年)</option>
+                </select>
             </div>
             <div class="form-group">
-                <label for="currRate">現時按揭年利率 (%)</label>
-                <input type="number" id="currRate" value="4.125" step="0.001">
+                <label>💰 現金回贈處理方式</label>
+                <select id="rebateAction" onchange="autoSave()">
+                    <option value="reinvest">🔥 全數扣減本金 (滾雪球)</option>
+                    <option value="keep">現金落袋 (作流動資金)</option>
+                </select>
             </div>
             <div class="form-group">
-                <label for="currTenure">假設不轉按，還剩餘幾多供款年期？ (年)</label>
-                <input type="number" id="currTenure" value="28">
+                <label>🏦 加按套現資金 (Mortgage-Link)</label>
+                <select id="mlAction" onchange="autoSave()">
+                    <option value="use_ml">🛡️ 全數存入 ML 賺息對沖 (上限50%)</option>
+                    <option value="none">自由資金落袋 (不存入 ML)</option>
+                </select>
             </div>
-            <button class="btn-next" onclick="switchTab('tab2')">下一步：設定轉按計劃 ➡️</button>
+            <button class="btn-main" onclick="switchTab(2)">前往設定每期策略 ➡️</button>
         </div>
     </div>
 
     <div id="tab2" class="tab-content">
         <div class="card">
-            <h2>2. 轉按新計劃 (自訂面板)</h2>
-            <div class="form-group">
-                <label for="newLoanAdjust">按揭成數 / 貸款額調整 (%)</label>
-                <select id="newLoanAdjust"></select>
-                <small style="color: #666; font-size: 0.8rem;">* 選擇「同上」代表平手轉按，貸款額維持不變。</small>
-            </div>
-            <div class="form-group">
-                <label for="newRate">新按揭年利率 (%)</label>
-                <select id="newRate"></select>
-            </div>
-            <div class="form-group">
-                <label for="newTenure">新按揭你想重新做幾多年期？ (年)</label>
-                <select id="newTenure"></select>
-            </div>
-            <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
-            <div class="form-group">
-                <label for="cashBack">新銀行現金回贈 (%)</label>
-                <input type="number" id="cashBack" value="1" step="0.1">
-            </div>
-            <div class="form-group">
-                <label for="legalFee">轉按手續費/律師費 ($)</label>
-                <input type="number" id="legalFee" value="6000">
-            </div>
-            <button onclick="generateComparison()">📊 進行 30 年詳細交叉比對</button>
+            <h2>📋 每期自訂面板</h2>
+            <p style="font-size:0.8rem; color:#666;">* 可獨立微調某一次的成數(加按)或利率。選擇「同上」會自動跟隨基礎設定。回贈及律師費預設全部相同，但可手動修改。</p>
+            <div id="cyclePanelContainer"></div>
+            <button class="btn-main" onclick="runCalculation()">🌀 立即運算結果</button>
         </div>
     </div>
 
     <div id="tab3" class="tab-content">
-        <div class="card" id="resultArea" style="display:none;">
-            <h2>📝 長遠供款開支總體對比</h2>
-            
-            <div class="summary-box">
-                <p><strong>💡 核心數據結論：</strong></p>
-                <ul>
-                    <li><strong>保持現狀（供完 <span class="lblCurrTen">28</span> 年）：</strong> 總利息支出約 <span id="sumCurrInt" style="font-weight:bold;">$0</span></li>
-                    <li><strong>選擇轉按（重新供 <span class="lblNewTen">30</span> 年）：</strong> 總利息支出約 <span id="sumNewInt" style="font-weight:bold;">$0</span></li>
-                    <li>新計劃現金回贈金額：<span id="sumCashBack" class="text-success">+$0</span>，轉按手續費成本：<span id="sumCost" class="text-danger">-$0</span></li>
-                </ul>
-                <div id="finalVerdict" class="verdict"></div>
+        <div class="summary-box" id="resultSummary" style="display:none;">
+            <h2 style="margin-top:0; color:var(--primary); font-size:1.1rem;">📊 策略總結 (<span id="sumYears"></span>年)</h2>
+            <ul>
+                <li>累計現金回贈：<span id="sumCB" class="text-success"></span></li>
+                <li>累計付律師費：<span id="sumFee" class="text-danger"></span></li>
+                <li>累計加按套現：<span id="sumCashOut" class="text-ml"></span> <br><small id="sumMLNote" style="color:#666;"></small></li>
+                <li>對沖後總慳息：<span id="sumInt" style="font-weight:bold;"></span></li>
+            </ul>
+            <div style="background:white; padding:10px; border-radius:5px; text-align:center; font-weight:bold; font-size:1.1rem; color:#03543f; border:1px solid #31c48d;">
+                🚀 額外創造淨財富：<span id="sumNetProfit"></span>
             </div>
+        </div>
 
-            <h2>📅 30年逐年供款與利息開支對比清單</h2>
-            <p style="font-size:0.85rem; color:#666;">* 下表展示每年（12個月）的累計數據。如果舊按揭在第 28 年供完，第 29-30 年舊計劃的供款及利息會自動歸零，方便與 30 年的新計劃作總開支對比。</p>
-            
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th rowspan="2" class="sticky-col">年份</th>
-                            <th colspan="3" class="bg-curr" style="color:#7b341e; text-align:center;">方案 A：保持現狀 (剩餘<span class="lblCurrTen">28</span>年)</th>
-                            <th colspan="3" class="bg-new" style="color:#1b5e20; text-align:center;">方案 B：選擇轉按 (全新<span class="lblNewTen">30</span>年)</th>
-                            <th rowspan="2" style="text-align:center;">每月供款相差<br>(方案A - B)</th>
-                            <th rowspan="2" style="text-align:center;">累計利息差額<br>(+為轉按慳咗)</th>
-                        </tr>
-                        <tr>
-                            <th class="bg-curr" style="color:#7b341e;">預計每月供款</th>
-                            <th class="bg-curr" style="color:#7b341e;">當年利息開支</th>
-                            <th class="bg-curr" style="color:#7b341e;">年末剩餘本金</th>
-                            <th class="bg-new" style="color:#1b5e20;">預計每月供款</th>
-                            <th class="bg-new" style="color:#1b5e20;">當年利息開支</th>
-                            <th class="bg-new" style="color:#1b5e20;">年末剩餘本金</th>
-                        </tr>
-                    </thead>
-                    <tbody id="comparisonTableBody">
-                    </tbody>
-                </table>
-            </div>
+        <div class="card" id="resultTableCard" style="display:none; padding:10px;">
+            <h2 style="font-size:1rem;">📅 兩年期對比大盤</h2>
+            <div class="table-wrap"><table id="loopTable"><thead><tr><th>期數</th><th>不轉按息</th><th>轉按起步本金</th><th>轉按息</th><th>新回贈</th><th>加按套現</th><th>ML賺息</th><th>淨財富增長</th><th>累計總回報</th></tr></thead><tbody id="loopTableBody"></tbody></table></div>
+        </div>
+
+        <div class="card" id="detailTableCard" style="display:none; padding:10px;">
+            <h2 style="font-size:1rem; display:flex; justify-content:space-between; align-items:center;">
+                <span>🔍 月度明細精查</span>
+                <select id="selectDetailYear" style="width:120px; font-size:0.85rem; padding:5px;" onchange="renderMonthlyDetailTable()"></select>
+            </h2>
+            <div class="table-wrap"><table id="detailTable"><thead><tr><th>月份</th><th>[A]不轉按息</th><th>[B]轉按月供</th><th>[B]利息</th><th>[B]剩餘本金</th><th>ML結餘</th><th>ML賺息</th><th>[B]實質淨息</th></tr></thead><tbody id="monthlyDetailTableBody"></tbody></table></div>
         </div>
     </div>
 </div>
 
 <div class="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('tab1')" id="nav-tab1">1. 現有按揭</div>
-    <div class="nav-item" onclick="switchTab('tab2')" id="nav-tab2">2. 轉按設定</div>
-    <div class="nav-item" onclick="switchTab('tab3')" id="nav-tab3">3. 比較結果</div>
+    <button class="nav-btn active" onclick="switchTab(1)" id="btnTab1"><span>⚙️</span>設定</button>
+    <button class="nav-btn" onclick="switchTab(2)" id="btnTab2"><span>📋</span>策略</button>
+    <button class="nav-btn" onclick="switchTab(3)" id="btnTab3"><span>📊</span>結果</button>
 </div>
 
 <script>
-    // 初始化下拉式選單 (Dropdowns)
-    function initDropdowns() {
-        // 貸款額調整 (0-150, 每10一數)
-        let ltvSelect = document.getElementById('newLoanAdjust');
-        ltvSelect.add(new Option('同上 (維持現有餘額)', 'same'));
-        for(let i = 0; i <= 150; i += 10) {
-            ltvSelect.add(new Option(i + '%', i));
-        }
-        ltvSelect.value = 'same';
+    let globalMonthlyLogA = [];
+    let globalMonthlyLogB = [];
 
-        // 新利率 (0-5, 每0.125一數)
-        let rateSelect = document.getElementById('newRate');
-        rateSelect.add(new Option('同上 (維持現有息率)', 'same'));
-        for(let i = 0; i <= 5; i += 0.125) {
-            rateSelect.add(new Option(i.toFixed(3) + '%', i.toFixed(3)));
-        }
-        rateSelect.value = 'same';
-
-        // 新按揭年期 (0-30年)
-        let tenureSelect = document.getElementById('newTenure');
-        tenureSelect.add(new Option('同上 (維持剩餘年期)', 'same'));
-        for(let i = 0; i <= 30; i++) {
-            tenureSelect.add(new Option(i + ' 年', i));
-        }
-        tenureSelect.value = 'same';
+    // 選項生成器
+    function genRateOptions() {
+        let h = `<option value="inherit">🔄 同上 (跟預設)</option>`;
+        for(let i=0; i<=5; i+=0.125) h += `<option value="${i}">${i}%</option>`;
+        return h;
+    }
+    function genTenureOptions() {
+        let h = `<option value="inherit">🔄 同上 (跟預設)</option>`;
+        for(let i=0; i<=30; i++) h += `<option value="${i}">${i} 年</option>`;
+        return h;
+    }
+    function genRatioOptions() {
+        let h = `<option value="inherit">🔄 同上 (不增減)</option>`;
+        for(let i=0; i<=150; i+=10) h += `<option value="${i}">${i}%</option>`;
+        return h;
     }
 
-    // 分頁切換功能
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        
-        document.getElementById(tabId).classList.add('active');
-        document.getElementById('nav-' + tabId).classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    // 初始化全局預設拉單
+    function initGlobalDropdowns() {
+        let rSelect = document.getElementById('loopRate');
+        let tSelect = document.getElementById('loopTenure');
+        let rHtml = ''; for(let i=0; i<=5; i+=0.125) rHtml += `<option value="${i}">${i}%</option>`;
+        let tHtml = ''; for(let i=1; i<=30; i++) tHtml += `<option value="${i}">${i} 年</option>`;
+        rSelect.innerHTML = rHtml; rSelect.value = "3.625";
+        tSelect.innerHTML = tHtml; tSelect.value = "30";
     }
 
-    // 頁面載入時自動執行
     window.onload = function() {
-        initDropdowns();
+        initGlobalDropdowns();
+        loadSavedData();
+        buildCyclePanel();
+        loadSavedCycleData();
     };
 
-    // --- 以下完全保留原有嘅核心計算代碼 ---
+    // 分頁切換
+    function switchTab(tabIndex) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`tab${tabIndex}`).classList.add('active');
+        document.getElementById(`btnTab${tabIndex}`).classList.add('active');
+        window.scrollTo(0,0);
+    }
 
-    function getAmortizationSchedule(principal, annualRate, totalYears) {
-        let monthlyRate = (annualRate / 100) / 12;
-        let totalMonths = totalYears * 12;
-        let pmt = 0;
+    // UI 構建：生成每期卡片
+    function buildCyclePanel() {
+        let count = parseInt(document.getElementById('cycleCount').value);
+        let container = document.getElementById('cyclePanelContainer');
+        container.innerHTML = '';
         
-        if (monthlyRate > 0) {
-            pmt = (principal * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1);
-        } else {
-            pmt = principal / totalMonths;
+        let gRebate = document.getElementById('globalRebate').value;
+        let gFee = document.getElementById('globalFee').value;
+
+        let rateOpts = genRateOptions();
+        let tenureOpts = genTenureOptions();
+        let ratioOpts = genRatioOptions();
+
+        for (let i = 1; i <= count; i++) {
+            let div = document.createElement('div');
+            div.className = 'cycle-card';
+            div.innerHTML = `
+                <div class="cycle-header">第 ${i} 次轉按 (第${(i-1)*2+1}-${i*2}年) <span style="color:#a0aec0; font-weight:normal; font-size:0.8rem;">C${i}</span></div>
+                <div class="cycle-grid">
+                    <div class="form-group"><label>新利率 (%)</label><select id="rate_c${i}" onchange="saveCycleData()">${rateOpts}</select></div>
+                    <div class="form-group"><label>年期 (年)</label><select id="tenure_c${i}" onchange="saveCycleData()">${tenureOpts}</select></div>
+                    <div class="form-group"><label>成數調整 (%)</label><select id="ratio_c${i}" onchange="saveCycleData()">${ratioOpts}</select></div>
+                    <div class="form-group" style="visibility:hidden;"><label>-</label></div>
+                    <div class="form-group"><label>回贈 (%)</label><input type="number" id="cb_c${i}" value="${gRebate}" step="0.01" oninput="saveCycleData()"></div>
+                    <div class="form-group"><label>律師費 ($)</label><input type="number" id="fee_c${i}" value="${gFee}" oninput="saveCycleData()"></div>
+                </div>
+            `;
+            container.appendChild(div);
         }
+    }
 
-        let schedule = [];
-        let currentBalance = principal;
+    function updateAllCycleInputs() {
+        let gRebate = document.getElementById('globalRebate').value;
+        let gFee = document.getElementById('globalFee').value;
+        let count = parseInt(document.getElementById('cycleCount').value);
+        for(let i=1; i<=count; i++) {
+            let cbEl = document.getElementById(`cb_c${i}`);
+            let feeEl = document.getElementById(`fee_c${i}`);
+            if(cbEl) cbEl.value = gRebate;
+            if(feeEl) feeEl.value = gFee;
+        }
+    }
 
-        for (let month = 1; month <= 360; month++) { // 劃一計算30年(360個月)
-            let interestPaid = 0;
-            let principalPaid = 0;
-            let currentPmt = 0;
-
-            if (month <= totalMonths && currentBalance > 0) {
-                currentPmt = pmt;
-                interestPaid = currentBalance * monthlyRate;
-                principalPaid = currentPmt - interestPaid;
-                currentBalance -= principalPaid;
-                if (currentBalance < 0) currentBalance = 0;
-            } else {
-                // 超過原定年期，供款及利息皆為0
-                currentPmt = 0;
-                interestPaid = 0;
-                principalPaid = 0;
-                currentBalance = 0;
-            }
-
-            schedule.push({
-                month: month,
-                pmt: currentPmt,
-                interest: interestPaid,
-                balance: currentBalance
+    // 儲存邏輯
+    function flashToast() {
+        let t = document.getElementById('saveToast');
+        t.style.opacity = 1;
+        setTimeout(() => t.style.opacity = 0, 1000);
+    }
+    function autoSave() {
+        let data = {
+            startLoan: document.getElementById('startLoan').value, currRate: document.getElementById('currRate').value,
+            startTenure: document.getElementById('startTenure').value, loopRate: document.getElementById('loopRate').value,
+            loopTenure: document.getElementById('loopTenure').value, globalRebate: document.getElementById('globalRebate').value,
+            globalFee: document.getElementById('globalFee').value, rebateAction: document.getElementById('rebateAction').value,
+            mlAction: document.getElementById('mlAction').value, cycleCount: document.getElementById('cycleCount').value
+        };
+        localStorage.setItem('refi_v61_global', JSON.stringify(data)); flashToast();
+    }
+    function saveCycleData() {
+        let count = parseInt(document.getElementById('cycleCount').value); let rows = [];
+        for(let i=1; i<=count; i++) {
+            rows.push({
+                rate: document.getElementById(`rate_c${i}`).value, tenure: document.getElementById(`tenure_c${i}`).value,
+                ratio: document.getElementById(`ratio_c${i}`).value, cb: document.getElementById(`cb_c${i}`).value,
+                fee: document.getElementById(`fee_c${i}`).value
             });
         }
-        return schedule;
+        localStorage.setItem('refi_v61_cycles', JSON.stringify(rows)); flashToast();
+    }
+    function loadSavedData() {
+        let s = localStorage.getItem('refi_v61_global'); if(!s) return; let d = JSON.parse(s);
+        ['startLoan','currRate','startTenure','loopRate','loopTenure','globalRebate','globalFee','rebateAction','mlAction','cycleCount'].forEach(id => {
+            if(d[id]) document.getElementById(id).value = d[id];
+        });
+    }
+    function loadSavedCycleData() {
+        let s = localStorage.getItem('refi_v61_cycles'); if(!s) return;
+        let rows = JSON.parse(s); let count = parseInt(document.getElementById('cycleCount').value);
+        for(let i=1; i<=count; i++) {
+            if(rows[i-1] && document.getElementById(`rate_c${i}`)) {
+                document.getElementById(`rate_c${i}`).value = rows[i-1].rate;
+                document.getElementById(`tenure_c${i}`).value = rows[i-1].tenure;
+                document.getElementById(`ratio_c${i}`).value = rows[i-1].ratio;
+                document.getElementById(`cb_c${i}`).value = rows[i-1].cb;
+                document.getElementById(`fee_c${i}`).value = rows[i-1].fee;
+            }
+        }
     }
 
-    function generateComparison() {
-        // 讀取輸入值
-        let currLoan = parseFloat(document.getElementById('currLoan').value) || 0;
+    // 運算核心
+    function runCalculation() {
+        switchTab(3); // 自動跳到結果頁
+
+        let startLoan = parseFloat(document.getElementById('startLoan').value) || 0;
         let currRate = parseFloat(document.getElementById('currRate').value) || 0;
-        let currTenure = parseInt(document.getElementById('currTenure').value) || 0;
+        let startTenure = parseInt(document.getElementById('startTenure').value) || 0;
+        let gRate = parseFloat(document.getElementById('loopRate').value) || 0;
+        let gTenure = parseInt(document.getElementById('loopTenure').value) || 0;
+        let rebateAction = document.getElementById('rebateAction').value;
+        let mlAction = document.getElementById('mlAction').value;
+        let cycleCount = parseInt(document.getElementById('cycleCount').value) || 1;
 
-        // 讀取下拉式選單 (處理「同上」邏輯)
-        let valLoanAdjust = document.getElementById('newLoanAdjust').value;
-        let valNewRate = document.getElementById('newRate').value;
-        let valNewTenure = document.getElementById('newTenure').value;
+        globalMonthlyLogA = []; globalMonthlyLogB = [];
+        let totalMonths = cycleCount * 2 * 12;
 
-        // 若選擇「同上」，則套用現有按揭數值；否則套用新數值
-        let newLoan = (valLoanAdjust === 'same') ? currLoan : currLoan * (parseFloat(valLoanAdjust) / 100);
-        let newRate = (valNewRate === 'same') ? currRate : parseFloat(valNewRate);
-        let newTenure = (valNewTenure === 'same') ? currTenure : parseInt(valNewTenure);
-
-        let cashBackPct = parseFloat(document.getElementById('cashBack').value) || 0;
-        let legalFee = parseFloat(document.getElementById('legalFee').value) || 0;
-
-        if (currLoan <= 0 || currTenure <= 0 || newTenure <= 0) {
-            alert('請填寫正確的貸款額與年期數據。');
-            return;
+        // 方案 A (不轉按)
+        let balanceA = startLoan; let tenureMonthsA = startTenure * 12; let rA = (currRate / 100) / 12;
+        for (let m = 1; m <= totalMonths; m++) {
+            let pmtA = 0, intA = 0, prinA = 0;
+            if (balanceA > 0 && tenureMonthsA > 0) {
+                pmtA = (balanceA * rA * Math.pow(1 + rA, tenureMonthsA)) / (Math.pow(1 + rA, tenureMonthsA) - 1);
+                intA = balanceA * rA; prinA = pmtA - intA;
+                if (prinA > balanceA) { prinA = balanceA; pmtA = intA + prinA; }
+                balanceA -= prinA; tenureMonthsA--;
+            }
+            if(balanceA<0) balanceA=0; globalMonthlyLogA.push({ int: intA, bal: balanceA });
         }
 
-        // 更新表頭文字
-        let lblCurrTens = document.getElementsByClassName('lblCurrTen');
-        for(let el of lblCurrTens) el.innerText = currTenure;
-        let lblNewTens = document.getElementsByClassName('lblNewTen');
-        for(let el of lblNewTens) el.innerText = newTenure;
+        // 方案 B (轉按)
+        let tbody = document.getElementById('loopTableBody'); tbody.innerHTML = '';
+        let balanceB = startLoan; let prevCashBack = 0; let cumMLBalance = 0;
+        let cumCashBack = 0, cumLegalFee = 0, cumCashOut = 0;
+        let cumInterestA = 0, cumInterestB = 0, cumMLEarned = 0, cumNetProfit = 0;
 
-        // 生成兩套計劃的360個月詳細明細表 (保留原有邏輯)
-        let currSched = getAmortizationSchedule(currLoan, currRate, currTenure);
-        let newSched = getAmortizationSchedule(newLoan, newRate, newTenure);
-
-        let tableBody = document.getElementById('comparisonTableBody');
-        tableBody.innerHTML = '';
-
-        let totalCurrIntAll = 0;
-        let totalNewIntAll = 0;
-        let cumInterestSaved = 0;
-
-        // 以年為單位（每12個月一組）進行數據加總並輸出
-        let maxDisplayYears = Math.max(currTenure, newTenure, 30);
-        
-        // 為了清單簡潔，我們循環 1 至 maxDisplayYears 年
-        for (let year = 1; year <= maxDisplayYears; year++) {
-            let startMonth = (year - 1) * 12;
+        for (let i = 1; i <= cycleCount; i++) {
+            // 讀取拉單並處理 "inherit"
+            let vRate = document.getElementById(`rate_c${i}`).value;
+            let vTenure = document.getElementById(`tenure_c${i}`).value;
+            let vRatio = document.getElementById(`ratio_c${i}`).value;
             
-            // 累計這一年的利息和平均供款
-            let currYearInt = 0;
-            let currYearPmt = 0;
-            let currEndBalance = 0;
+            let cRate = vRate === 'inherit' ? gRate : parseFloat(vRate);
+            let cTenure = vTenure === 'inherit' ? gTenure : parseInt(vTenure);
+            let cRatio = vRatio === 'inherit' ? 100 : parseFloat(vRatio);
             
-            let newYearInt = 0;
-            let newYearPmt = 0;
-            let newEndBalance = 0;
+            let cCBpct = parseFloat(document.getElementById(`cb_c${i}`).value) || 0;
+            let cFee = parseFloat(document.getElementById(`fee_c${i}`).value) || 0;
 
-            for (let m = 0; m < 12; m++) {
-                let idx = startMonth + m;
-                
-                currYearInt += currSched[idx].interest;
-                currYearPmt = currSched[idx].pmt; // 每月供款基本上固定
-                currEndBalance = currSched[idx].balance;
+            let thisCycleCashOut = 0;
 
-                newYearInt += newSched[idx].interest;
-                newYearPmt = newSched[idx].pmt;
-                newEndBalance = newSched[idx].balance;
+            if (balanceB > 0) {
+                if (rebateAction === 'reinvest' && i > 1 && prevCashBack > 0) balanceB -= prevCashBack;
+                let preRatioB = balanceB;
+                balanceB = balanceB * (cRatio / 100);
+                let diff = balanceB - preRatioB;
+                if (diff > 0) {
+                    thisCycleCashOut = diff; cumCashOut += diff;
+                    if (mlAction === 'use_ml') cumMLBalance += diff;
+                }
+            } else { balanceB = 0; }
+            if (balanceB < 0) balanceB = 0;
+
+            let startBalCycle = balanceB;
+            let thisCB = startBalCycle > 0 ? startBalCycle * (cCBpct / 100) : 0;
+            let thisFee = startBalCycle > 0 ? cFee : 0;
+
+            let rB = (cRate / 100) / 12; let tenureMonthsB = cTenure * 12;
+            let intPaidThisCycle = 0, mlEarnedThisCycle = 0;
+
+            for (let m = 1; m <= 24; m++) {
+                let pmtB = 0, intB = 0, prinB = 0, mlIntMonth = 0;
+                if (balanceB > 0 && tenureMonthsB > 0) {
+                    pmtB = (balanceB * rB * Math.pow(1 + rB, tenureMonthsB)) / (Math.pow(1 + rB, tenureMonthsB) - 1);
+                    intB = balanceB * rB; prinB = pmtB - intB;
+                    
+                    if (mlAction === 'use_ml' && cumMLBalance > 0) {
+                        let eligibleML = Math.min(cumMLBalance, balanceB * 0.5);
+                        mlIntMonth = eligibleML * rB;
+                    }
+                    if (prinB > balanceB) { prinB = balanceB; pmtB = intB + prinB; }
+                    balanceB -= prinB; intPaidThisCycle += intB; mlEarnedThisCycle += mlIntMonth; tenureMonthsB--;
+                }
+                if(balanceB<0) balanceB=0;
+                globalMonthlyLogB.push({ pmt: pmtB, int: intB, prin: prinB, bal: balanceB, mlBal: cumMLBalance, mlInt: mlIntMonth, netInt: intB - mlIntMonth });
             }
 
-            totalCurrIntAll += currYearInt;
-            totalNewIntAll += newYearInt;
+            let intPaidAThisCycle = 0;
+            for (let m = 1; m <= 24; m++) intPaidAThisCycle += globalMonthlyLogA[((i-1)*24)+m-1].int;
 
-            let yearInterestSaved = currYearInt - newYearInt;
-            cumInterestSaved += yearInterestSaved;
+            let netIntSaved = intPaidAThisCycle - intPaidThisCycle + mlEarnedThisCycle;
+            let netProfit = netIntSaved + thisCB - thisFee;
 
-            let pmtDiff = currYearPmt - newYearPmt;
+            cumCashBack += thisCB; cumLegalFee += thisFee; cumInterestA += intPaidAThisCycle;
+            cumInterestB += intPaidThisCycle; cumMLEarned += mlEarnedThisCycle; cumNetProfit += netProfit;
 
-            // 建立表格行 (完全保留原本嘅字串顯示邏輯)
             let tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="sticky-col">第 ${year} 年</td>
-                <td class="bg-curr">${currYearPmt > 0 ? '$' + Math.round(currYearPmt).toLocaleString() : '$0'}</td>
-                <td class="bg-curr">$${Math.round(currYearInt).toLocaleString()}</td>
-                <td class="bg-curr">$${Math.round(currEndBalance).toLocaleString()}</td>
-                
-                <td class="bg-new">${newYearPmt > 0 ? '$' + Math.round(newYearPmt).toLocaleString() : '$0'}</td>
-                <td class="bg-new">$${Math.round(newYearInt).toLocaleString()}</td>
-                <td class="bg-new">$${Math.round(newEndBalance).toLocaleString()}</td>
-                
-                <td class="text-center ${pmtDiff > 0 ? 'text-success' : pmtDiff < 0 ? 'text-danger' : ''}">
-                    ${pmtDiff > 0 ? '少供 $' + Math.round(pmtDiff).toLocaleString() : pmtDiff < 0 ? '多供 $' + Math.round(Math.abs(pmtDiff)).toLocaleString() : '$0'}
-                </td>
-                <td class="text-center ${cumInterestSaved > 0 ? 'text-success' : 'text-danger'}">
-                    $${Math.round(cumInterestSaved).toLocaleString()}
-                </td>
+                <td class="text-center">C${i}</td>
+                <td>$${Math.round(intPaidAThisCycle).toLocaleString()}</td>
+                <td style="font-weight:bold; color:var(--primary);">$${Math.round(startBalCycle).toLocaleString()}</td>
+                <td>$${Math.round(intPaidThisCycle).toLocaleString()}</td>
+                <td class="text-success">+$${Math.round(thisCB).toLocaleString()}</td>
+                <td class="text-ml">$${Math.round(thisCycleCashOut).toLocaleString()}</td>
+                <td class="text-ml">+$${Math.round(mlEarnedThisCycle).toLocaleString()}</td>
+                <td class="text-success">$${Math.round(netProfit).toLocaleString()}</td>
+                <td style="font-weight:bold; background:#fcf3cf;">$${Math.round(cumNetProfit).toLocaleString()}</td>
             `;
-            tableBody.appendChild(tr);
+            tbody.appendChild(tr);
+            prevCashBack = thisCB;
         }
 
-        // 計算獎金與手續費 (按照原本邏輯及加入新貸款額計算)
-        let cashBackAmount = newLoan * (cashBackPct / 100);
-        let finalBenefit = (totalCurrIntAll - totalNewIntAll) + cashBackAmount - legalFee;
-
-        // 渲染總覽數據
-        document.getElementById('sumCurrInt').innerText = '$' + Math.round(totalCurrIntAll).toLocaleString();
-        document.getElementById('sumNewInt').innerText = '$' + Math.round(totalNewIntAll).toLocaleString();
-        document.getElementById('sumCashBack').innerText = '+$' + Math.round(cashBackAmount).toLocaleString();
-        document.getElementById('sumCost').innerText = '-$' + Math.round(legalFee).toLocaleString();
-
-        let verdictBox = document.getElementById('finalVerdict');
-        if (finalBenefit > 0) {
-            verdictBox.className = "verdict good";
-            verdictBox.innerHTML = `🎉 經 30 年長遠計算，轉按更划算！扣除所有手續費及年期拉長影響，淨回報為 <strong>$${Math.round(finalBenefit).toLocaleString()}</strong>。`;
-        } else {
-            verdictBox.className = "verdict bad";
-            verdictBox.innerHTML = `⚠️ 注意：長遠計算不划算！拉長到 30 年雖然令你前期「每月供少咗」，但因為供款期長了 2 年，總利息支出大增，扣除回贈後長遠仍會多付 <strong>$${Math.round(Math.abs(finalBenefit)).toLocaleString()}</strong>！`;
-        }
-
-        document.getElementById('resultArea').style.display = 'block';
+        // 總結面板
+        document.getElementById('sumYears').innerText = cycleCount * 2;
+        document.getElementById('sumCB').innerText = '$' + Math.round(cumCashBack).toLocaleString();
+        document.getElementById('sumFee').innerText = '-$' + Math.round(cumLegalFee).toLocaleString();
+        document.getElementById('sumCashOut').innerText = '$' + Math.round(cumCashOut).toLocaleString();
+        document.getElementById('sumMLNote').innerText = mlAction === 'use_ml' ? `(自動對沖，已省息 $${Math.round(cumMLEarned).toLocaleString()})` : '(未存入ML)';
         
-        // 點擊後自動切換到結果分頁
-        switchTab('tab3');
+        let netInt = cumInterestA - cumInterestB + cumMLEarned;
+        let sumIntEl = document.getElementById('sumInt');
+        if(netInt >= 0) { sumIntEl.innerText = '+$' + Math.round(netInt).toLocaleString(); sumIntEl.className = 'text-success'; }
+        else { sumIntEl.innerText = '-$' + Math.round(Math.abs(netInt)).toLocaleString(); sumIntEl.className = 'text-danger'; }
+        
+        document.getElementById('sumNetProfit').innerText = '$' + Math.round(cumNetProfit).toLocaleString();
+        
+        // 年份選單
+        let selY = document.getElementById('selectDetailYear'); selY.innerHTML = '';
+        for (let y = 1; y <= cycleCount * 2; y++) {
+            let opt = document.createElement('option'); opt.value = y; opt.innerText = `第 ${y} 年`;
+            if(y === 1) opt.selected = true; selY.appendChild(opt);
+        }
+
+        document.getElementById('resultSummary').style.display = 'block';
+        document.getElementById('resultTableCard').style.display = 'block';
+        document.getElementById('detailTableCard').style.display = 'block';
+        renderMonthlyDetailTable();
+    }
+
+    function renderMonthlyDetailTable() {
+        let y = parseInt(document.getElementById('selectDetailYear').value) || 1;
+        let tbody = document.getElementById('monthlyDetailTableBody'); tbody.innerHTML = '';
+        let startM = (y - 1) * 12;
+
+        for (let m = 0; m < 12; m++) {
+            let logA = globalMonthlyLogA[startM + m]; let logB = globalMonthlyLogB[startM + m];
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="text-center">${m+1}</td>
+                <td>$${Math.round(logA.int).toLocaleString()}</td>
+                <td>$${Math.round(logB.pmt).toLocaleString()}</td>
+                <td class="text-danger">$${Math.round(logB.int).toLocaleString()}</td>
+                <td>$${Math.round(logB.bal).toLocaleString()}</td>
+                <td style="color:var(--ml);">$${Math.round(logB.mlBal).toLocaleString()}</td>
+                <td class="text-success">+$${Math.round(logB.mlInt).toLocaleString()}</td>
+                <td style="font-weight:bold; color:var(--secondary); background:#eaf2f8;">$${Math.round(logB.netInt).toLocaleString()}</td>
+            `;
+            tbody.appendChild(tr);
+        }
     }
 </script>
-
 </body>
 </html>
