@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>轉按終極策略 v6.2 - 數據補完版</title>
+    <title>轉按終極策略 v6.3 - 穩定修復版</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -15,7 +15,7 @@
             --text: #333;
             --ml: #8e44ad;
             --border: #e2e8f0;
-            --planA: #8a4b38; /* 方案A專用顏色 */
+            --planA: #8a4b38;
         }
 
         body {
@@ -100,7 +100,6 @@
         .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: right; }
         
-        /* 針對兩個表格設定不同的最小寬度，確保手機左右滑動空間足夠 */
         #loopTable { min-width: 950px; }
         #detailTable { min-width: 1050px; }
         
@@ -116,7 +115,6 @@
         .summary-box { background: #f5eef8; border: 2px solid #d7bde2; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
         .summary-box ul { padding-left: 20px; margin: 10px 0; font-size: 0.9rem; }
         
-        /* 標題分類顏色背景 */
         .th-planA { background-color: #5d4037 !important; }
         .th-planB { background-color: #2e4053 !important; }
     </style>
@@ -124,7 +122,7 @@
 <body>
 
 <div class="header">
-    <h1>🏠 轉按終極策略沙盤 v6.2</h1>
+    <h1>🏠 轉按終極策略沙盤 v6.3</h1>
     <p>手機優化排版 ‧ 拉單選取 ‧ 完整數據對比</p>
 </div>
 
@@ -263,11 +261,16 @@
     </div>
 </div>
 
+<div class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab(1)" id="btnTab1"><span>⚙️</span>設定</button>
+    <button class="nav-btn" onclick="switchTab(2)" id="btnTab2"><span>📋</span>策略</button>
+    <button class="nav-btn" onclick="switchTab(3)" id="btnTab3"><span>📊</span>結果</button>
+</div>
+
 <script>
     let globalMonthlyLogA = [];
     let globalMonthlyLogB = [];
 
-    // 選項生成器
     function genRateOptions() {
         let h = `<option value="inherit">🔄 同上 (跟預設)</option>`;
         for(let i=0; i<=5; i+=0.125) h += `<option value="${i}">${i}%</option>`;
@@ -287,34 +290,43 @@
     function initGlobalDropdowns() {
         let rSelect = document.getElementById('loopRate');
         let tSelect = document.getElementById('loopTenure');
+        if(!rSelect || !tSelect) return;
+        
         let rHtml = ''; for(let i=0; i<=5; i+=0.125) rHtml += `<option value="${i}">${i}%</option>`;
         let tHtml = ''; for(let i=1; i<=30; i++) tHtml += `<option value="${i}">${i} 年</option>`;
         rSelect.innerHTML = rHtml; rSelect.value = "3.625";
         tSelect.innerHTML = tHtml; tSelect.value = "30";
     }
 
+    // 嚴謹的加載流程修復
     window.onload = function() {
-        initGlobalDropdowns();
-        loadSavedData();
-        buildCyclePanel();
-        loadSavedCycleData();
+        initGlobalDropdowns(); // 1. 先建立基礎下拉選單
+        loadSavedData();       // 2. 載入本地存檔（如果有的話，會覆蓋預設值）
+        buildCyclePanel();     // 3. 根據當前的 cycleCount 建立每期卡片
+        loadSavedCycleData();  // 4. 載入每期獨立設定的存檔
     };
 
     function switchTab(tabIndex) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(`tab${tabIndex}`).classList.add('active');
-        document.getElementById(`btnTab${tabIndex}`).classList.add('active');
+        let targetTab = document.getElementById(`tab${tabIndex}`);
+        let targetBtn = document.getElementById(`btnTab${tabIndex}`);
+        if(targetTab) targetTab.classList.add('active');
+        if(targetBtn) targetBtn.classList.add('active');
         window.scrollTo(0,0);
     }
 
     function buildCyclePanel() {
-        let count = parseInt(document.getElementById('cycleCount').value);
+        let cycleEl = document.getElementById('cycleCount');
+        if(!cycleEl) return;
+        let count = parseInt(cycleEl.value) || 5;
         let container = document.getElementById('cyclePanelContainer');
+        if(!container) return;
+        
         container.innerHTML = '';
         
-        let gRebate = document.getElementById('globalRebate').value;
-        let gFee = document.getElementById('globalFee').value;
+        let gRebate = document.getElementById('globalRebate')?.value || "1.0";
+        let gFee = document.getElementById('globalFee')?.value || "6000";
 
         let rateOpts = genRateOptions();
         let tenureOpts = genTenureOptions();
@@ -339,9 +351,11 @@
     }
 
     function updateAllCycleInputs() {
-        let gRebate = document.getElementById('globalRebate').value;
-        let gFee = document.getElementById('globalFee').value;
-        let count = parseInt(document.getElementById('cycleCount').value);
+        let gRebate = document.getElementById('globalRebate')?.value || "1.0";
+        let gFee = document.getElementById('globalFee')?.value || "6000";
+        let cycleEl = document.getElementById('cycleCount');
+        if(!cycleEl) return;
+        let count = parseInt(cycleEl.value) || 5;
         for(let i=1; i<=count; i++) {
             let cbEl = document.getElementById(`cb_c${i}`);
             let feeEl = document.getElementById(`fee_c${i}`);
@@ -352,45 +366,62 @@
 
     function flashToast() {
         let t = document.getElementById('saveToast');
-        t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 1000);
+        if(t) { t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 1000); }
     }
+    
     function autoSave() {
         let data = {
-            startLoan: document.getElementById('startLoan').value, currRate: document.getElementById('currRate').value,
-            startTenure: document.getElementById('startTenure').value, loopRate: document.getElementById('loopRate').value,
-            loopTenure: document.getElementById('loopTenure').value, globalRebate: document.getElementById('globalRebate').value,
-            globalFee: document.getElementById('globalFee').value, rebateAction: document.getElementById('rebateAction').value,
-            mlAction: document.getElementById('mlAction').value, cycleCount: document.getElementById('cycleCount').value
+            startLoan: document.getElementById('startLoan')?.value, currRate: document.getElementById('currRate')?.value,
+            startTenure: document.getElementById('startTenure')?.value, loopRate: document.getElementById('loopRate')?.value,
+            loopTenure: document.getElementById('loopTenure')?.value, globalRebate: document.getElementById('globalRebate')?.value,
+            globalFee: document.getElementById('globalFee')?.value, rebateAction: document.getElementById('rebateAction')?.value,
+            mlAction: document.getElementById('mlAction')?.value, cycleCount: document.getElementById('cycleCount')?.value
         };
-        localStorage.setItem('refi_v62_global', JSON.stringify(data)); flashToast();
+        localStorage.setItem('refi_v63_global', JSON.stringify(data)); flashToast();
     }
+    
     function saveCycleData() {
-        let count = parseInt(document.getElementById('cycleCount').value); let rows = [];
+        let cycleEl = document.getElementById('cycleCount');
+        if(!cycleEl) return;
+        let count = parseInt(cycleEl.value) || 5; let rows = [];
         for(let i=1; i<=count; i++) {
             rows.push({
-                rate: document.getElementById(`rate_c${i}`).value, tenure: document.getElementById(`tenure_c${i}`).value,
-                ratio: document.getElementById(`ratio_c${i}`).value, cb: document.getElementById(`cb_c${i}`).value,
-                fee: document.getElementById(`fee_c${i}`).value
+                rate: document.getElementById(`rate_c${i}`)?.value || 'inherit', 
+                tenure: document.getElementById(`tenure_c${i}`)?.value || 'inherit',
+                ratio: document.getElementById(`ratio_c${i}`)?.value || 'inherit', 
+                cb: document.getElementById(`cb_c${i}`)?.value || '0',
+                fee: document.getElementById(`fee_c${i}`)?.value || '0'
             });
         }
-        localStorage.setItem('refi_v62_cycles', JSON.stringify(rows)); flashToast();
+        localStorage.setItem('refi_v63_cycles', JSON.stringify(rows)); flashToast();
     }
+    
     function loadSavedData() {
-        let s = localStorage.getItem('refi_v62_global'); if(!s) return; let d = JSON.parse(s);
+        let s = localStorage.getItem('refi_v63_global'); if(!s) return; let d = JSON.parse(s);
         ['startLoan','currRate','startTenure','loopRate','loopTenure','globalRebate','globalFee','rebateAction','mlAction','cycleCount'].forEach(id => {
-            if(d[id]) document.getElementById(id).value = d[id];
+            let el = document.getElementById(id);
+            if(el && d[id] !== undefined) el.value = d[id];
         });
     }
+    
     function loadSavedCycleData() {
-        let s = localStorage.getItem('refi_v62_cycles'); if(!s) return;
-        let rows = JSON.parse(s); let count = parseInt(document.getElementById('cycleCount').value);
+        let s = localStorage.getItem('refi_v63_cycles'); if(!s) return;
+        let rows = JSON.parse(s); 
+        let cycleEl = document.getElementById('cycleCount');
+        if(!cycleEl) return;
+        let count = parseInt(cycleEl.value) || 5;
         for(let i=1; i<=count; i++) {
-            if(rows[i-1] && document.getElementById(`rate_c${i}`)) {
-                document.getElementById(`rate_c${i}`).value = rows[i-1].rate;
-                document.getElementById(`tenure_c${i}`).value = rows[i-1].tenure;
-                document.getElementById(`ratio_c${i}`).value = rows[i-1].ratio;
-                document.getElementById(`cb_c${i}`).value = rows[i-1].cb;
-                document.getElementById(`fee_c${i}`).value = rows[i-1].fee;
+            if(rows[i-1]) {
+                let rEl = document.getElementById(`rate_c${i}`);
+                let tEl = document.getElementById(`tenure_c${i}`);
+                let raEl = document.getElementById(`ratio_c${i}`);
+                let cEl = document.getElementById(`cb_c${i}`);
+                let fEl = document.getElementById(`fee_c${i}`);
+                if(rEl && rows[i-1].rate !== undefined) rEl.value = rows[i-1].rate;
+                if(tEl && rows[i-1].tenure !== undefined) tEl.value = rows[i-1].tenure;
+                if(raEl && rows[i-1].ratio !== undefined) raEl.value = rows[i-1].ratio;
+                if(cEl && rows[i-1].cb !== undefined) cEl.value = rows[i-1].cb;
+                if(fEl && rows[i-1].fee !== undefined) fEl.value = rows[i-1].fee;
             }
         }
     }
@@ -398,19 +429,18 @@
     function runCalculation() {
         switchTab(3);
 
-        let startLoan = parseFloat(document.getElementById('startLoan').value) || 0;
-        let currRate = parseFloat(document.getElementById('currRate').value) || 0;
-        let startTenure = parseInt(document.getElementById('startTenure').value) || 0;
-        let gRate = parseFloat(document.getElementById('loopRate').value) || 0;
-        let gTenure = parseInt(document.getElementById('loopTenure').value) || 0;
-        let rebateAction = document.getElementById('rebateAction').value;
-        let mlAction = document.getElementById('mlAction').value;
-        let cycleCount = parseInt(document.getElementById('cycleCount').value) || 1;
+        let startLoan = parseFloat(document.getElementById('startLoan')?.value) || 0;
+        let currRate = parseFloat(document.getElementById('currRate')?.value) || 0;
+        let startTenure = parseInt(document.getElementById('startTenure')?.value) || 0;
+        let gRate = parseFloat(document.getElementById('loopRate')?.value) || 0;
+        let gTenure = parseInt(document.getElementById('loopTenure')?.value) || 0;
+        let rebateAction = document.getElementById('rebateAction')?.value || 'reinvest';
+        let mlAction = document.getElementById('mlAction')?.value || 'use_ml';
+        let cycleCount = parseInt(document.getElementById('cycleCount')?.value) || 1;
 
         globalMonthlyLogA = []; globalMonthlyLogB = [];
         let totalMonths = cycleCount * 2 * 12;
 
-        // 方案 A (不轉按) - 加入儲存 pmt
         let balanceA = startLoan; let tenureMonthsA = startTenure * 12; let rA = (currRate / 100) / 12;
         for (let m = 1; m <= totalMonths; m++) {
             let pmtA = 0, intA = 0, prinA = 0;
@@ -421,26 +451,27 @@
                 balanceA -= prinA; tenureMonthsA--;
             }
             if(balanceA<0) balanceA=0; 
-            globalMonthlyLogA.push({ pmt: pmtA, int: intA, bal: balanceA }); // 新增紀錄 pmt
+            globalMonthlyLogA.push({ pmt: pmtA, int: intA, bal: balanceA });
         }
 
-        // 方案 B (轉按)
-        let tbody = document.getElementById('loopTableBody'); tbody.innerHTML = '';
+        let tbody = document.getElementById('loopTableBody'); 
+        if(tbody) tbody.innerHTML = '';
+        
         let balanceB = startLoan; let prevCashBack = 0; let cumMLBalance = 0;
         let cumCashBack = 0, cumLegalFee = 0, cumCashOut = 0;
         let cumInterestA = 0, cumInterestB = 0, cumMLEarned = 0, cumNetProfit = 0;
 
         for (let i = 1; i <= cycleCount; i++) {
-            let vRate = document.getElementById(`rate_c${i}`).value;
-            let vTenure = document.getElementById(`tenure_c${i}`).value;
-            let vRatio = document.getElementById(`ratio_c${i}`).value;
+            let vRate = document.getElementById(`rate_c${i}`)?.value || 'inherit';
+            let vTenure = document.getElementById(`tenure_c${i}`)?.value || 'inherit';
+            let vRatio = document.getElementById(`ratio_c${i}`)?.value || 'inherit';
             
             let cRate = vRate === 'inherit' ? gRate : parseFloat(vRate);
             let cTenure = vTenure === 'inherit' ? gTenure : parseInt(vTenure);
             let cRatio = vRatio === 'inherit' ? 100 : parseFloat(vRatio);
             
-            let cCBpct = parseFloat(document.getElementById(`cb_c${i}`).value) || 0;
-            let cFee = parseFloat(document.getElementById(`fee_c${i}`).value) || 0;
+            let cCBpct = parseFloat(document.getElementById(`cb_c${i}`)?.value) || 0;
+            let cFee = parseFloat(document.getElementById(`fee_c${i}`)?.value) || 0;
 
             let thisCycleCashOut = 0;
 
@@ -481,9 +512,11 @@
             }
 
             let intPaidAThisCycle = 0;
-            for (let m = 1; m <= 24; m++) intPaidAThisCycle += globalMonthlyLogA[((i-1)*24)+m-1].int;
+            for (let m = 1; m <= 24; m++) {
+                let idx = ((i-1)*24)+m-1;
+                if(globalMonthlyLogA[idx]) intPaidAThisCycle += globalMonthlyLogA[idx].int;
+            }
 
-            // 獲取該兩年期末的方案A剩餘本金
             let balAEndCycle = globalMonthlyLogA[(i * 24) - 1] ? globalMonthlyLogA[(i * 24) - 1].bal : 0;
 
             let netIntSaved = intPaidAThisCycle - intPaidThisCycle + mlEarnedThisCycle;
@@ -492,20 +525,22 @@
             cumCashBack += thisCB; cumLegalFee += thisFee; cumInterestA += intPaidAThisCycle;
             cumInterestB += intPaidThisCycle; cumMLEarned += mlEarnedThisCycle; cumNetProfit += netProfit;
 
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="text-center" style="font-weight:bold;">C${i}</td>
-                <td class="text-planA">$${Math.round(intPaidAThisCycle).toLocaleString()}</td>
-                <td class="text-planA" style="font-weight:bold;">$${Math.round(balAEndCycle).toLocaleString()}</td>
-                <td style="font-weight:bold; color:var(--secondary);">$${Math.round(startBalCycle).toLocaleString()}</td>
-                <td>$${Math.round(intPaidThisCycle).toLocaleString()}</td>
-                <td class="text-success">+$${Math.round(thisCB).toLocaleString()}</td>
-                <td class="text-ml">$${Math.round(thisCycleCashOut).toLocaleString()}</td>
-                <td class="text-ml">+$${Math.round(mlEarnedThisCycle).toLocaleString()}</td>
-                <td class="text-success">$${Math.round(netProfit).toLocaleString()}</td>
-                <td style="font-weight:bold; background:#fcf3cf; color:#b7950b;">$${Math.round(cumNetProfit).toLocaleString()}</td>
-            `;
-            tbody.appendChild(tr);
+            if(tbody) {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-center" style="font-weight:bold;">C${i}</td>
+                    <td class="text-planA">$${Math.round(intPaidAThisCycle).toLocaleString()}</td>
+                    <td class="text-planA" style="font-weight:bold;">$${Math.round(balAEndCycle).toLocaleString()}</td>
+                    <td style="font-weight:bold; color:var(--secondary);">$${Math.round(startBalCycle).toLocaleString()}</td>
+                    <td>$${Math.round(intPaidThisCycle).toLocaleString()}</td>
+                    <td class="text-success">+$${Math.round(thisCB).toLocaleString()}</td>
+                    <td class="text-ml">$${Math.round(thisCycleCashOut).toLocaleString()}</td>
+                    <td class="text-ml">+$${Math.round(mlEarnedThisCycle).toLocaleString()}</td>
+                    <td class="text-success">$${Math.round(netProfit).toLocaleString()}</td>
+                    <td style="font-weight:bold; background:#fcf3cf; color:#b7950b;">$${Math.round(cumNetProfit).toLocaleString()}</td>
+                `;
+                tbody.appendChild(tr);
+            }
             prevCashBack = thisCB;
         }
 
@@ -517,15 +552,21 @@
         
         let netInt = cumInterestA - cumInterestB + cumMLEarned;
         let sumIntEl = document.getElementById('sumInt');
-        if(netInt >= 0) { sumIntEl.innerText = '+$' + Math.round(netInt).toLocaleString(); sumIntEl.className = 'text-success'; }
-        else { sumIntEl.innerText = '-$' + Math.round(Math.abs(netInt)).toLocaleString(); sumIntEl.className = 'text-danger'; }
+        if(sumIntEl) {
+            if(netInt >= 0) { sumIntEl.innerText = '+$' + Math.round(netInt).toLocaleString(); sumIntEl.className = 'text-success'; }
+            else { sumIntEl.innerText = '-$' + Math.round(Math.abs(netInt)).toLocaleString(); sumIntEl.className = 'text-danger'; }
+        }
         
-        document.getElementById('sumNetProfit').innerText = '$' + Math.round(cumNetProfit).toLocaleString();
+        let sumNP = document.getElementById('sumNetProfit');
+        if(sumNP) sumNP.innerText = '$' + Math.round(cumNetProfit).toLocaleString();
         
-        let selY = document.getElementById('selectDetailYear'); selY.innerHTML = '';
-        for (let y = 1; y <= cycleCount * 2; y++) {
-            let opt = document.createElement('option'); opt.value = y; opt.innerText = `第 ${y} 年`;
-            if(y === 1) opt.selected = true; selY.appendChild(opt);
+        let selY = document.getElementById('selectDetailYear'); 
+        if(selY) {
+            selY.innerHTML = '';
+            for (let y = 1; y <= cycleCount * 2; y++) {
+                let opt = document.createElement('option'); opt.value = y; opt.innerText = `第 ${y} 年`;
+                if(y === 1) opt.selected = true; selY.appendChild(opt);
+            }
         }
 
         document.getElementById('resultSummary').style.display = 'block';
@@ -535,12 +576,16 @@
     }
 
     function renderMonthlyDetailTable() {
-        let y = parseInt(document.getElementById('selectDetailYear').value) || 1;
-        let tbody = document.getElementById('monthlyDetailTableBody'); tbody.innerHTML = '';
+        let selY = document.getElementById('selectDetailYear');
+        let y = parseInt(selY ? selY.value : 1) || 1;
+        let tbody = document.getElementById('monthlyDetailTableBody'); 
+        if(!tbody) return;
+        tbody.innerHTML = '';
         let startM = (y - 1) * 12;
 
         for (let m = 0; m < 12; m++) {
             let logA = globalMonthlyLogA[startM + m]; let logB = globalMonthlyLogB[startM + m];
+            if(!logA || !logB) continue;
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="text-center" style="font-weight:bold;">${m+1}</td>
