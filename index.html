@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>轉按終極策略 v6.3 - 穩定修復版</title>
+    <title>轉按終極策略 v6.4 - 30年彈性極限版</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -122,8 +122,8 @@
 <body>
 
 <div class="header">
-    <h1>🏠 轉按終極策略沙盤 v6.3</h1>
-    <p>手機優化排版 ‧ 拉單選取 ‧ 完整數據對比</p>
+    <h1>🏠 轉按終極策略沙盤 v6.4</h1>
+    <p>手機優化排版 ‧ 支援 0-15 次長效對比 ‧ 數據不失真</p>
 </div>
 
 <div id="saveToast" class="save-toast">已儲存</div>
@@ -156,9 +156,22 @@
             <div class="form-group">
                 <label>🔄 想連續轉按幾多次？ (2年一轉)</label>
                 <select id="cycleCount" onchange="buildCyclePanel(); autoSave();">
+                    <option value="0">0 次 (純原生方案A大盤對照)</option>
+                    <option value="1">轉 1 次 (2 年)</option>
+                    <option value="2">轉 2 次 (4 年)</option>
                     <option value="3">轉 3 次 (6 年)</option>
+                    <option value="4">轉 4 次 (8 年)</option>
                     <option value="5" selected>轉 5 次 (10 年)</option>
+                    <option value="6">轉 6 次 (12 年)</option>
+                    <option value="7">轉 7 次 (14 年)</option>
+                    <option value="8">轉 8 次 (16 年)</option>
+                    <option value="9">轉 9 次 (18 年)</option>
                     <option value="10">轉 10 次 (20 年)</option>
+                    <option value="11">轉 11 次 (22 年)</option>
+                    <option value="12">轉 12 次 (24 年)</option>
+                    <option value="13">轉 13 次 (26 年)</option>
+                    <option value="14">轉 14 次 (28 年)</option>
+                    <option value="15">轉 15 次 (30 年)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -175,14 +188,14 @@
                     <option value="none">自由資金落袋 (不存入 ML)</option>
                 </select>
             </div>
-            <button class="btn-main" onclick="switchTab(2)">前往設定每期策略 ➡️</button>
+            <button class="btn-main" id="nextStepBtn" onclick="switchTab(2)">前往設定每期策略 ➡️</button>
         </div>
     </div>
 
     <div id="tab2" class="tab-content">
         <div class="card">
             <h2>📋 每期自訂面板</h2>
-            <p style="font-size:0.8rem; color:#666;">* 可獨立微調某一次的成數或利率。選擇「同上」會自動跟隨基礎設定。</p>
+            <p id="cycleTiptext" style="font-size:0.8rem; color:#666;">* 可獨立微調某一次的成數或利率。選擇「同上」會自動跟隨基礎設定。</p>
             <div id="cyclePanelContainer"></div>
             <button class="btn-main" onclick="runCalculation()">🌀 立即運算結果</button>
         </div>
@@ -298,12 +311,11 @@
         tSelect.innerHTML = tHtml; tSelect.value = "30";
     }
 
-    // 嚴謹的加載流程修復
     window.onload = function() {
-        initGlobalDropdowns(); // 1. 先建立基礎下拉選單
-        loadSavedData();       // 2. 載入本地存檔（如果有的話，會覆蓋預設值）
-        buildCyclePanel();     // 3. 根據當前的 cycleCount 建立每期卡片
-        loadSavedCycleData();  // 4. 載入每期獨立設定的存檔
+        initGlobalDropdowns(); 
+        loadSavedData();       
+        buildCyclePanel();     
+        loadSavedCycleData();  
     };
 
     function switchTab(tabIndex) {
@@ -319,11 +331,28 @@
     function buildCyclePanel() {
         let cycleEl = document.getElementById('cycleCount');
         if(!cycleEl) return;
-        let count = parseInt(cycleEl.value) || 5;
+        let count = parseInt(cycleEl.value);
+        
+        let nextStepBtn = document.getElementById('nextStepBtn');
+        let btnTab2 = document.getElementById('btnTab2');
+        
+        // 互動優化：當使用者選 0 次時，跳過中間步驟，直接按按鈕就可以去睇結果
+        if(count === 0) {
+            if(nextStepBtn) nextStepBtn.innerHTML = "查看純原生不轉按大盤結果 ➡️";
+            if(btnTab2) btnTab2.style.display = "none"; // 隱藏無用嘅策略頁簽
+        } else {
+            if(nextStepBtn) nextStepBtn.innerHTML = "前往設定每期策略 ➡️";
+            if(btnTab2) btnTab2.style.display = "block";
+        }
+
         let container = document.getElementById('cyclePanelContainer');
         if(!container) return;
-        
         container.innerHTML = '';
+        
+        if(count === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:30px; color:#718096;">您選擇了 0 次轉按（純方案A大盤模擬）。請直接點選下方或導航欄的「結果」分頁運算。</div>`;
+            return;
+        }
         
         let gRebate = document.getElementById('globalRebate')?.value || "1.0";
         let gFee = document.getElementById('globalFee')?.value || "6000";
@@ -355,7 +384,7 @@
         let gFee = document.getElementById('globalFee')?.value || "6000";
         let cycleEl = document.getElementById('cycleCount');
         if(!cycleEl) return;
-        let count = parseInt(cycleEl.value) || 5;
+        let count = parseInt(cycleEl.value) || 0;
         for(let i=1; i<=count; i++) {
             let cbEl = document.getElementById(`cb_c${i}`);
             let feeEl = document.getElementById(`fee_c${i}`);
@@ -377,27 +406,29 @@
             globalFee: document.getElementById('globalFee')?.value, rebateAction: document.getElementById('rebateAction')?.value,
             mlAction: document.getElementById('mlAction')?.value, cycleCount: document.getElementById('cycleCount')?.value
         };
-        localStorage.setItem('refi_v63_global', JSON.stringify(data)); flashToast();
+        localStorage.setItem('refi_v64_global', JSON.stringify(data)); flashToast();
     }
     
     function saveCycleData() {
         let cycleEl = document.getElementById('cycleCount');
         if(!cycleEl) return;
-        let count = parseInt(cycleEl.value) || 5; let rows = [];
+        let count = parseInt(cycleEl.value) || 0; let rows = [];
         for(let i=1; i<=count; i++) {
+            let r = document.getElementById(`rate_c${i}`)?.value;
+            if(!r) continue;
             rows.push({
-                rate: document.getElementById(`rate_c${i}`)?.value || 'inherit', 
+                rate: r, 
                 tenure: document.getElementById(`tenure_c${i}`)?.value || 'inherit',
                 ratio: document.getElementById(`ratio_c${i}`)?.value || 'inherit', 
                 cb: document.getElementById(`cb_c${i}`)?.value || '0',
                 fee: document.getElementById(`fee_c${i}`)?.value || '0'
             });
         }
-        localStorage.setItem('refi_v63_cycles', JSON.stringify(rows)); flashToast();
+        localStorage.setItem('refi_v64_cycles', JSON.stringify(rows)); flashToast();
     }
     
     function loadSavedData() {
-        let s = localStorage.getItem('refi_v63_global'); if(!s) return; let d = JSON.parse(s);
+        let s = localStorage.getItem('refi_v64_global'); if(!s) return; let d = JSON.parse(s);
         ['startLoan','currRate','startTenure','loopRate','loopTenure','globalRebate','globalFee','rebateAction','mlAction','cycleCount'].forEach(id => {
             let el = document.getElementById(id);
             if(el && d[id] !== undefined) el.value = d[id];
@@ -405,23 +436,20 @@
     }
     
     function loadSavedCycleData() {
-        let s = localStorage.getItem('refi_v63_cycles'); if(!s) return;
+        let s = localStorage.getItem('refi_v64_cycles'); if(!s) return;
         let rows = JSON.parse(s); 
         let cycleEl = document.getElementById('cycleCount');
         if(!cycleEl) return;
-        let count = parseInt(cycleEl.value) || 5;
+        let count = parseInt(cycleEl.value) || 0;
         for(let i=1; i<=count; i++) {
             if(rows[i-1]) {
                 let rEl = document.getElementById(`rate_c${i}`);
-                let tEl = document.getElementById(`tenure_c${i}`);
-                let raEl = document.getElementById(`ratio_c${i}`);
-                let cEl = document.getElementById(`cb_c${i}`);
-                let fEl = document.getElementById(`fee_c${i}`);
-                if(rEl && rows[i-1].rate !== undefined) rEl.value = rows[i-1].rate;
-                if(tEl && rows[i-1].tenure !== undefined) tEl.value = rows[i-1].tenure;
-                if(raEl && rows[i-1].ratio !== undefined) raEl.value = rows[i-1].ratio;
-                if(cEl && rows[i-1].cb !== undefined) cEl.value = rows[i-1].cb;
-                if(fEl && rows[i-1].fee !== undefined) fEl.value = rows[i-1].fee;
+                if(!rEl) continue;
+                if(rows[i-1].rate !== undefined) rEl.value = rows[i-1].rate;
+                if(rows[i-1].tenure !== undefined) document.getElementById(`tenure_c${i}`).value = rows[i-1].tenure;
+                if(rows[i-1].ratio !== undefined) document.getElementById(`ratio_c${i}`).value = rows[i-1].ratio;
+                if(rows[i-1].cb !== undefined) document.getElementById(`cb_c${i}`).value = rows[i-1].cb;
+                if(rows[i-1].fee !== undefined) document.getElementById(`fee_c${i}`).value = rows[i-1].fee;
             }
         }
     }
@@ -436,11 +464,16 @@
         let gTenure = parseInt(document.getElementById('loopTenure')?.value) || 0;
         let rebateAction = document.getElementById('rebateAction')?.value || 'reinvest';
         let mlAction = document.getElementById('mlAction')?.value || 'use_ml';
-        let cycleCount = parseInt(document.getElementById('cycleCount')?.value) || 1;
+        let cycleCount = parseInt(document.getElementById('cycleCount')?.value);
+        if (isNaN(cycleCount)) cycleCount = 5;
 
         globalMonthlyLogA = []; globalMonthlyLogB = [];
-        let totalMonths = cycleCount * 2 * 12;
+        
+        // 假如選擇 0 次，就強行跑 2 年（24個月）作為基礎對照展示，避免空資料
+        let displayCycles = cycleCount === 0 ? 1 : cycleCount;
+        let totalMonths = displayCycles * 2 * 12;
 
+        // 1. 計算方案 A (不轉按)
         let balanceA = startLoan; let tenureMonthsA = startTenure * 12; let rA = (currRate / 100) / 12;
         for (let m = 1; m <= totalMonths; m++) {
             let pmtA = 0, intA = 0, prinA = 0;
@@ -450,13 +483,56 @@
                 if (prinA > balanceA) { prinA = balanceA; pmtA = intA + prinA; }
                 balanceA -= prinA; tenureMonthsA--;
             }
-            if(balanceA<0) balanceA=0; 
+            if(balanceA < 0) balanceA = 0; 
             globalMonthlyLogA.push({ pmt: pmtA, int: intA, bal: balanceA });
         }
 
         let tbody = document.getElementById('loopTableBody'); 
         if(tbody) tbody.innerHTML = '';
         
+        // 如果是 0 次轉按，直接渲染純大盤數據後返回
+        if(cycleCount === 0) {
+            let intPaidAThisCycle = 0;
+            for (let m = 1; m <= 24; m++) intPaidAThisCycle += globalMonthlyLogA[m-1].int;
+            let balAEndCycle = globalMonthlyLogA[23] ? globalMonthlyLogA[23].bal : 0;
+
+            if(tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td class="text-center" style="font-weight:bold;">對照期</td>
+                        <td class="text-planA">$${Math.round(intPaidAThisCycle).toLocaleString()}</td>
+                        <td class="text-planA" style="font-weight:bold;">$${Math.round(balAEndCycle).toLocaleString()}</td>
+                        <td colspan="6" style="text-align:center; color:#a0aec0; background:#f8fafc;">(未啟動轉按策略，無方案B數據)</td>
+                        <td style="font-weight:bold; background:#fcf3cf; color:#b7950b;">$0</td>
+                    </tr>
+                `;
+            }
+            document.getElementById('sumYears').innerText = "2 (純對照)";
+            document.getElementById('sumCB').innerText = '$0';
+            document.getElementById('sumFee').innerText = '$0';
+            document.getElementById('sumCashOut').innerText = '$0';
+            document.getElementById('sumMLNote').innerText = '(純方案A大盤對照)';
+            document.getElementById('sumInt').innerText = '$0';
+            document.getElementById('sumInt').className = '';
+            document.getElementById('sumNetProfit').innerText = '$0';
+
+            let selY = document.getElementById('selectDetailYear'); 
+            if(selY) {
+                selY.innerHTML = '<option value="1">第 1 年</option><option value="2">第 2 年</option>';
+            }
+            // 偽造一份與 A 完全等同的 B 紀錄，供明細表底層順利渲染，避免空白
+            globalMonthlyLogB = globalMonthlyLogA.map(item => ({
+                pmt: item.pmt, int: item.int, prin: item.pmt-item.int, bal: item.bal, mlBal: 0, mlInt: 0, netInt: item.int
+            }));
+
+            document.getElementById('resultSummary').style.display = 'block';
+            document.getElementById('resultTableCard').style.display = 'block';
+            document.getElementById('detailTableCard').style.display = 'block';
+            renderMonthlyDetailTable();
+            return;
+        }
+
+        // 2. 正常計算方案 B (轉按)
         let balanceB = startLoan; let prevCashBack = 0; let cumMLBalance = 0;
         let cumCashBack = 0, cumLegalFee = 0, cumCashOut = 0;
         let cumInterestA = 0, cumInterestB = 0, cumMLEarned = 0, cumNetProfit = 0;
@@ -507,7 +583,7 @@
                     if (prinB > balanceB) { prinB = balanceB; pmtB = intB + prinB; }
                     balanceB -= prinB; intPaidThisCycle += intB; mlEarnedThisCycle += mlIntMonth; tenureMonthsB--;
                 }
-                if(balanceB<0) balanceB=0;
+                if(balanceB < 0) balanceB = 0;
                 globalMonthlyLogB.push({ pmt: pmtB, int: intB, prin: prinB, bal: balanceB, mlBal: cumMLBalance, mlInt: mlIntMonth, netInt: intB - mlIntMonth });
             }
 
