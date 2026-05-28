@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>轉按終極策略 v6.5 - 本金對稱版</title>
+    <title>轉按終極策略 v6.7 - ML爆額防溢版</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -122,13 +122,14 @@
 <body>
 
 <div class="header">
-    <h1>🏠 轉按終極策略沙盤 v6.5</h1>
-    <p>手機優化排版 ‧ 兩方案起步本金對稱對比 ‧ 數據更清晰</p>
+    <h1>🏠 轉按終極策略沙盤 v6.7</h1>
+    <p>手機優化排版 ‧ 支援 Mortgage-Link 爆額自動扣減本金功能</p>
 </div>
 
 <div id="saveToast" class="save-toast">已儲存</div>
 
 <div class="container">
+    <!-- ================= 分頁 1: 基礎設定 ================= -->
     <div id="tab1" class="tab-content active">
         <div class="card">
             <h2>1. 目前按揭狀態</h2>
@@ -178,7 +179,9 @@
                 <label>💰 現金回贈處理方式</label>
                 <select id="rebateAction" onchange="autoSave()">
                     <option value="reinvest">🔥 全數扣減本金 (滾雪球)</option>
-                    <option value="keep">現金落袋 (作流動資金)</option>
+                    <option value="to_ml">💰 全數存入 ML 賺息對沖 (高流動性)</option>
+                    <option value="to_ml_safe">🛡️ 全數存入 ML + 爆額自動扣減本金 (智能防溢)</option>
+                    <option value="keep">現金落袋 (作其它外部投資)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -192,6 +195,7 @@
         </div>
     </div>
 
+    <!-- ================= 分頁 2: 每期策略 ================= -->
     <div id="tab2" class="tab-content">
         <div class="card">
             <h2>📋 每期自訂面板</h2>
@@ -201,6 +205,7 @@
         </div>
     </div>
 
+    <!-- ================= 分頁 3: 運算結果 ================= -->
     <div id="tab3" class="tab-content">
         <div class="summary-box" id="resultSummary" style="display:none;">
             <h2 style="margin-top:0; color:var(--primary); font-size:1.1rem;">📊 策略總結 (<span id="sumYears"></span>年)</h2>
@@ -274,6 +279,7 @@
     </div>
 </div>
 
+<!-- 底部導航 -->
 <div class="bottom-nav">
     <button class="nav-btn active" onclick="switchTab(1)" id="btnTab1"><span>⚙️</span>設定</button>
     <button class="nav-btn" onclick="switchTab(2)" id="btnTab2"><span>📋</span>策略</button>
@@ -405,7 +411,7 @@
             globalFee: document.getElementById('globalFee')?.value, rebateAction: document.getElementById('rebateAction')?.value,
             mlAction: document.getElementById('mlAction')?.value, cycleCount: document.getElementById('cycleCount')?.value
         };
-        localStorage.setItem('refi_v65_global', JSON.stringify(data)); flashToast();
+        localStorage.setItem('refi_v67_global', JSON.stringify(data)); flashToast();
     }
     
     function saveCycleData() {
@@ -423,11 +429,11 @@
                 fee: document.getElementById(`fee_c${i}`)?.value || '0'
             });
         }
-        localStorage.setItem('refi_v65_cycles', JSON.stringify(rows)); flashToast();
+        localStorage.setItem('refi_v67_cycles', JSON.stringify(rows)); flashToast();
     }
     
     function loadSavedData() {
-        let s = localStorage.getItem('refi_v65_global'); if(!s) return; let d = JSON.parse(s);
+        let s = localStorage.getItem('refi_v67_global'); if(!s) return; let d = JSON.parse(s);
         ['startLoan','currRate','startTenure','loopRate','loopTenure','globalRebate','globalFee','rebateAction','mlAction','cycleCount'].forEach(id => {
             let el = document.getElementById(id);
             if(el && d[id] !== undefined) el.value = d[id];
@@ -435,7 +441,7 @@
     }
     
     function loadSavedCycleData() {
-        let s = localStorage.getItem('refi_v65_cycles'); if(!s) return;
+        let s = localStorage.getItem('refi_v67_cycles'); if(!s) return;
         let rows = JSON.parse(s); 
         let cycleEl = document.getElementById('cycleCount');
         if(!cycleEl) return;
@@ -471,11 +477,10 @@
         let displayCycles = cycleCount === 0 ? 1 : cycleCount;
         let totalMonths = displayCycles * 2 * 12;
 
-        // 1. 先完整的計算一次 方案 A (不轉按) 月供明細，用作後續提取「每期起步本金」
+        // 1. 完整計算 方案 A (不轉按) 月供明細
         let balanceA = startLoan; let tenureMonthsA = startTenure * 12; let rA = (currRate / 100) / 12;
         for (let m = 1; m <= totalMonths; m++) {
             let pmtA = 0, intA = 0, prinA = 0;
-            // 記錄當月還沒扣減前的「起步本金」
             let monthlyStartBalA = balanceA;
             if (balanceA > 0 && tenureMonthsA > 0) {
                 pmtA = (balanceA * rA * Math.pow(1 + rA, tenureMonthsA)) / (Math.pow(1 + rA, tenureMonthsA) - 1);
@@ -530,7 +535,9 @@
         }
 
         // 2. 正常計算方案 B (轉按)
-        let balanceB = startLoan; let prevCashBack = 0; let cumMLBalance = 0;
+        let balanceB = startLoan; 
+        let prevCashBack = 0;     // 用於 reinvest 扣減本金
+        let cumMLBalance = 0;     // 累計存入 ML 戶口的資金池
         let cumCashBack = 0, cumLegalFee = 0, cumCashOut = 0;
         let cumInterestA = 0, cumInterestB = 0, cumMLEarned = 0, cumNetProfit = 0;
 
@@ -548,35 +555,61 @@
 
             let thisCycleCashOut = 0;
 
+            // 處理上一次轉按留下來的現金回贈（如果選擇直接扣減本金方案）
             if (balanceB > 0) {
-                if (rebateAction === 'reinvest' && i > 1 && prevCashBack > 0) balanceB -= prevCashBack;
+                if (rebateAction === 'reinvest' && i > 1 && prevCashBack > 0) {
+                    balanceB -= prevCashBack; 
+                }
+                
+                // 處理加按套現
                 let preRatioB = balanceB;
                 balanceB = balanceB * (cRatio / 100);
                 let diff = balanceB - preRatioB;
                 if (diff > 0) {
                     thisCycleCashOut = diff; cumCashOut += diff;
-                    if (mlAction === 'use_ml') cumMLBalance += diff;
+                    if (mlAction === 'use_ml') cumMLBalance += diff; // 加按資金進入 ML
                 }
             } else { balanceB = 0; }
             if (balanceB < 0) balanceB = 0;
 
             let startBalCycleB = balanceB;
+            // 計算本次轉按能拿到的新現金回贈
             let thisCB = startBalCycleB > 0 ? startBalCycleB * (cCBpct / 100) : 0;
             let thisFee = startBalCycleB > 0 ? cFee : 0;
+
+            // 如果回贈處理選擇了「全數存入 ML 系列」，轉按首日直接注入 ML 池
+            if ((rebateAction === 'to_ml' || rebateAction === 'to_ml_safe') && thisCB > 0) {
+                cumMLBalance += thisCB;
+            }
 
             let rB = (cRate / 100) / 12; let tenureMonthsB = cTenure * 12;
             let intPaidThisCycle = 0, mlEarnedThisCycle = 0;
 
             for (let m = 1; m <= 24; m++) {
                 let pmtB = 0, intB = 0, prinB = 0, mlIntMonth = 0;
+                
                 if (balanceB > 0 && tenureMonthsB > 0) {
+                    
+                    // 🌟 核心防溢防爆邏輯：在計算利息與供款前，先檢查當月 ML 是否爆額
+                    if (rebateAction === 'to_ml_safe' && cumMLBalance > 0) {
+                        let maxMlLimmits = balanceB * 0.5; // 當月 ML 受益上限（本金的一半）
+                        if (cumMLBalance > maxMlLimmits) {
+                            let overflowAmount = cumMLBalance - maxMlLimmits; // 算出爆額的部分
+                            balanceB -= overflowAmount;      // 自動把爆額餘額【扣減按揭本金】
+                            cumMLBalance -= overflowAmount;   // 同步從 ML 戶口扣除這筆已還本金的錢
+                        }
+                    }
+
+                    // 開始正常按揭月供結算
                     pmtB = (balanceB * rB * Math.pow(1 + rB, tenureMonthsB)) / (Math.pow(1 + rB, tenureMonthsB) - 1);
                     intB = balanceB * rB; prinB = pmtB - intB;
                     
-                    if (mlAction === 'use_ml' && cumMLBalance > 0) {
+                    // 計算 ML 當月賺息（50% 上限對沖）
+                    if (cumMLBalance > 0) {
                         let eligibleML = Math.min(cumMLBalance, balanceB * 0.5);
                         mlIntMonth = eligibleML * rB;
                     }
+                    
                     if (prinB > balanceB) { prinB = balanceB; pmtB = intB + prinB; }
                     balanceB -= prinB; intPaidThisCycle += intB; mlEarnedThisCycle += mlIntMonth; tenureMonthsB--;
                 }
@@ -584,11 +617,11 @@
                 globalMonthlyLogB.push({ pmt: pmtB, int: intB, prin: prinB, bal: balanceB, mlBal: cumMLBalance, mlInt: mlIntMonth, netInt: intB - mlIntMonth });
             }
 
-            // 提取方案 A 在該期起點（第 1 個月）的起步本金
+            // 提取方案 A 該期起點的起步本金
             let idxStart = (i - 1) * 24;
             let balAStartCycle = globalMonthlyLogA[idxStart] ? globalMonthlyLogA[idxStart].startBal : 0;
 
-            // 累加方案 A 該期 24 個月的利息
+            // 累加方案 A 該期利息
             let intPaidAThisCycle = 0;
             for (let m = 1; m <= 24; m++) {
                 let idx = idxStart + m - 1;
@@ -625,7 +658,11 @@
         document.getElementById('sumCB').innerText = '$' + Math.round(cumCashBack).toLocaleString();
         document.getElementById('sumFee').innerText = '-$' + Math.round(cumLegalFee).toLocaleString();
         document.getElementById('sumCashOut').innerText = '$' + Math.round(cumCashOut).toLocaleString();
-        document.getElementById('sumMLNote').innerText = mlAction === 'use_ml' ? `(自動對沖，已省息 $${Math.round(cumMLEarned).toLocaleString()})` : '(未存入ML)';
+        
+        let sumMLNoteEl = document.getElementById('sumMLNote');
+        if(sumMLNoteEl) {
+            sumMLNoteEl.innerText = `(已併入套現/回贈資金進行對沖，共省息 $${Math.round(cumMLEarned).toLocaleString()})`;
+        }
         
         let netInt = cumInterestA - cumInterestB + cumMLEarned;
         let sumIntEl = document.getElementById('sumInt');
