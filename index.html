@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>轉按終極策略 v6.4 - 30年彈性極限版</title>
+    <title>轉按終極策略 v6.5 - 本金對稱版</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -122,8 +122,8 @@
 <body>
 
 <div class="header">
-    <h1>🏠 轉按終極策略沙盤 v6.4</h1>
-    <p>手機優化排版 ‧ 支援 0-15 次長效對比 ‧ 數據不失真</p>
+    <h1>🏠 轉按終極策略沙盤 v6.5</h1>
+    <p>手機優化排版 ‧ 兩方案起步本金對稱對比 ‧ 數據更清晰</p>
 </div>
 
 <div id="saveToast" class="save-toast">已儲存</div>
@@ -227,8 +227,8 @@
                             <th rowspan="2" style="background-color:#2c3e50;">累計總回報</th>
                         </tr>
                         <tr>
+                            <th class="th-planA">起步本金</th>
                             <th class="th-planA">期內總利息</th>
-                            <th class="th-planA">期末剩餘本金</th>
                             <th class="th-planB">起步本金</th>
                             <th class="th-planB">期內總利息</th>
                             <th class="th-planB">新回贈</th>
@@ -336,10 +336,9 @@
         let nextStepBtn = document.getElementById('nextStepBtn');
         let btnTab2 = document.getElementById('btnTab2');
         
-        // 互動優化：當使用者選 0 次時，跳過中間步驟，直接按按鈕就可以去睇結果
         if(count === 0) {
             if(nextStepBtn) nextStepBtn.innerHTML = "查看純原生不轉按大盤結果 ➡️";
-            if(btnTab2) btnTab2.style.display = "none"; // 隱藏無用嘅策略頁簽
+            if(btnTab2) btnTab2.style.display = "none";
         } else {
             if(nextStepBtn) nextStepBtn.innerHTML = "前往設定每期策略 ➡️";
             if(btnTab2) btnTab2.style.display = "block";
@@ -406,7 +405,7 @@
             globalFee: document.getElementById('globalFee')?.value, rebateAction: document.getElementById('rebateAction')?.value,
             mlAction: document.getElementById('mlAction')?.value, cycleCount: document.getElementById('cycleCount')?.value
         };
-        localStorage.setItem('refi_v64_global', JSON.stringify(data)); flashToast();
+        localStorage.setItem('refi_v65_global', JSON.stringify(data)); flashToast();
     }
     
     function saveCycleData() {
@@ -424,11 +423,11 @@
                 fee: document.getElementById(`fee_c${i}`)?.value || '0'
             });
         }
-        localStorage.setItem('refi_v64_cycles', JSON.stringify(rows)); flashToast();
+        localStorage.setItem('refi_v65_cycles', JSON.stringify(rows)); flashToast();
     }
     
     function loadSavedData() {
-        let s = localStorage.getItem('refi_v64_global'); if(!s) return; let d = JSON.parse(s);
+        let s = localStorage.getItem('refi_v65_global'); if(!s) return; let d = JSON.parse(s);
         ['startLoan','currRate','startTenure','loopRate','loopTenure','globalRebate','globalFee','rebateAction','mlAction','cycleCount'].forEach(id => {
             let el = document.getElementById(id);
             if(el && d[id] !== undefined) el.value = d[id];
@@ -436,7 +435,7 @@
     }
     
     function loadSavedCycleData() {
-        let s = localStorage.getItem('refi_v64_cycles'); if(!s) return;
+        let s = localStorage.getItem('refi_v65_cycles'); if(!s) return;
         let rows = JSON.parse(s); 
         let cycleEl = document.getElementById('cycleCount');
         if(!cycleEl) return;
@@ -469,14 +468,15 @@
 
         globalMonthlyLogA = []; globalMonthlyLogB = [];
         
-        // 假如選擇 0 次，就強行跑 2 年（24個月）作為基礎對照展示，避免空資料
         let displayCycles = cycleCount === 0 ? 1 : cycleCount;
         let totalMonths = displayCycles * 2 * 12;
 
-        // 1. 計算方案 A (不轉按)
+        // 1. 先完整的計算一次 方案 A (不轉按) 月供明細，用作後續提取「每期起步本金」
         let balanceA = startLoan; let tenureMonthsA = startTenure * 12; let rA = (currRate / 100) / 12;
         for (let m = 1; m <= totalMonths; m++) {
             let pmtA = 0, intA = 0, prinA = 0;
+            // 記錄當月還沒扣減前的「起步本金」
+            let monthlyStartBalA = balanceA;
             if (balanceA > 0 && tenureMonthsA > 0) {
                 pmtA = (balanceA * rA * Math.pow(1 + rA, tenureMonthsA)) / (Math.pow(1 + rA, tenureMonthsA) - 1);
                 intA = balanceA * rA; prinA = pmtA - intA;
@@ -484,24 +484,23 @@
                 balanceA -= prinA; tenureMonthsA--;
             }
             if(balanceA < 0) balanceA = 0; 
-            globalMonthlyLogA.push({ pmt: pmtA, int: intA, bal: balanceA });
+            globalMonthlyLogA.push({ pmt: pmtA, int: intA, bal: balanceA, startBal: monthlyStartBalA });
         }
 
         let tbody = document.getElementById('loopTableBody'); 
         if(tbody) tbody.innerHTML = '';
         
-        // 如果是 0 次轉按，直接渲染純大盤數據後返回
+        // 0次轉按純大盤渲染
         if(cycleCount === 0) {
             let intPaidAThisCycle = 0;
             for (let m = 1; m <= 24; m++) intPaidAThisCycle += globalMonthlyLogA[m-1].int;
-            let balAEndCycle = globalMonthlyLogA[23] ? globalMonthlyLogA[23].bal : 0;
-
+            
             if(tbody) {
                 tbody.innerHTML = `
                     <tr>
                         <td class="text-center" style="font-weight:bold;">對照期</td>
+                        <td class="text-planA" style="font-weight:bold;">$${Math.round(startLoan).toLocaleString()}</td>
                         <td class="text-planA">$${Math.round(intPaidAThisCycle).toLocaleString()}</td>
-                        <td class="text-planA" style="font-weight:bold;">$${Math.round(balAEndCycle).toLocaleString()}</td>
                         <td colspan="6" style="text-align:center; color:#a0aec0; background:#f8fafc;">(未啟動轉按策略，無方案B數據)</td>
                         <td style="font-weight:bold; background:#fcf3cf; color:#b7950b;">$0</td>
                     </tr>
@@ -517,10 +516,8 @@
             document.getElementById('sumNetProfit').innerText = '$0';
 
             let selY = document.getElementById('selectDetailYear'); 
-            if(selY) {
-                selY.innerHTML = '<option value="1">第 1 年</option><option value="2">第 2 年</option>';
-            }
-            // 偽造一份與 A 完全等同的 B 紀錄，供明細表底層順利渲染，避免空白
+            if(selY) selY.innerHTML = '<option value="1">第 1 年</option><option value="2">第 2 年</option>';
+
             globalMonthlyLogB = globalMonthlyLogA.map(item => ({
                 pmt: item.pmt, int: item.int, prin: item.pmt-item.int, bal: item.bal, mlBal: 0, mlInt: 0, netInt: item.int
             }));
@@ -563,9 +560,9 @@
             } else { balanceB = 0; }
             if (balanceB < 0) balanceB = 0;
 
-            let startBalCycle = balanceB;
-            let thisCB = startBalCycle > 0 ? startBalCycle * (cCBpct / 100) : 0;
-            let thisFee = startBalCycle > 0 ? cFee : 0;
+            let startBalCycleB = balanceB;
+            let thisCB = startBalCycleB > 0 ? startBalCycleB * (cCBpct / 100) : 0;
+            let thisFee = startBalCycleB > 0 ? cFee : 0;
 
             let rB = (cRate / 100) / 12; let tenureMonthsB = cTenure * 12;
             let intPaidThisCycle = 0, mlEarnedThisCycle = 0;
@@ -587,13 +584,16 @@
                 globalMonthlyLogB.push({ pmt: pmtB, int: intB, prin: prinB, bal: balanceB, mlBal: cumMLBalance, mlInt: mlIntMonth, netInt: intB - mlIntMonth });
             }
 
+            // 提取方案 A 在該期起點（第 1 個月）的起步本金
+            let idxStart = (i - 1) * 24;
+            let balAStartCycle = globalMonthlyLogA[idxStart] ? globalMonthlyLogA[idxStart].startBal : 0;
+
+            // 累加方案 A 該期 24 個月的利息
             let intPaidAThisCycle = 0;
             for (let m = 1; m <= 24; m++) {
-                let idx = ((i-1)*24)+m-1;
+                let idx = idxStart + m - 1;
                 if(globalMonthlyLogA[idx]) intPaidAThisCycle += globalMonthlyLogA[idx].int;
             }
-
-            let balAEndCycle = globalMonthlyLogA[(i * 24) - 1] ? globalMonthlyLogA[(i * 24) - 1].bal : 0;
 
             let netIntSaved = intPaidAThisCycle - intPaidThisCycle + mlEarnedThisCycle;
             let netProfit = netIntSaved + thisCB - thisFee;
@@ -605,9 +605,10 @@
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="text-center" style="font-weight:bold;">C${i}</td>
+                    <td class="text-planA" style="font-weight:bold;">$${Math.round(balAStartCycle).toLocaleString()}</td>
                     <td class="text-planA">$${Math.round(intPaidAThisCycle).toLocaleString()}</td>
-                    <td class="text-planA" style="font-weight:bold;">$${Math.round(balAEndCycle).toLocaleString()}</td>
-                    <td style="font-weight:bold; color:var(--secondary);">$${Math.round(startBalCycle).toLocaleString()}</td>
+                    
+                    <td style="font-weight:bold; color:var(--secondary);">$${Math.round(startBalCycleB).toLocaleString()}</td>
                     <td>$${Math.round(intPaidThisCycle).toLocaleString()}</td>
                     <td class="text-success">+$${Math.round(thisCB).toLocaleString()}</td>
                     <td class="text-ml">$${Math.round(thisCycleCashOut).toLocaleString()}</td>
